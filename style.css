@@ -16,10 +16,8 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body {
-    font-family: "Sarabun", sans-serif;
-    background: #222; 
-    color: var(--text-main); /* ใช้ตัวแปรที่สร้างใหม่ */
-    line-height: 1.5;
+    background: var(--bg-app);
+    color: var(--text-main);
 }
 
 /* ===== SPLASH ===== */
@@ -402,8 +400,8 @@ body.dark .reset-chat-bar span {
     color: #5a8ab0;
 }
 body.dark {
-    --card-bg: #1e293b;  /* แก้ให้ชัดเจนขึ้น */
-    --text-main: #f1f5f9;
+    --card-bg: #1e293b;
+    --text-main: #e2e8f0;
     --text-muted: #94a3b8;
 }
 

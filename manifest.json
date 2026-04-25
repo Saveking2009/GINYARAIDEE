@@ -3,7 +3,7 @@
   "short_name": "GINYALAIDEE",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#112233",
+  "background_color": "#ffffff",
   "theme_color": "#ff7a18",
   "icons": [
     {

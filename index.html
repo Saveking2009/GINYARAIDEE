@@ -254,7 +254,7 @@ const DRUG_DB = [
 ];
 
 const DANGER_WORDS = ["แน่นหน้าอก","หายใจไม่ออก","ชัก","ปากเบี้ยว","แขนขาอ่อนแรง","เลือดไม่หยุด","สลบ"];
-const API_KEY = "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";
+const API_KEY = "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";
 
 let selectedGender = "";
 let isSending = false;
@@ -681,9 +681,14 @@ function toggleTheme() {
 }
 
 (function () {
-    if (localStorage.getItem('theme') === 'dark') {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark') {
         document.body.classList.add('dark');
         document.getElementById('theme-btn').innerText = '☀️';
+    } else {
+        // ถ้าไม่มีค่าหรือเป็น light ให้ลบ dark ออก
+        document.body.classList.remove('dark');
+        document.getElementById('theme-btn').innerText = '🌙';
     }
 })();
 
