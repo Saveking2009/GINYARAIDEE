@@ -254,7 +254,7 @@ const DRUG_DB = [
 ];
 
 const DANGER_WORDS = ["แน่นหน้าอก","หายใจไม่ออก","ชัก","ปากเบี้ยว","แขนขาอ่อนแรง","เลือดไม่หยุด","สลบ"];
-const API_KEY = "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";
+const API_KEY = "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";
 
 let selectedGender = "";
 let isSending = false;
@@ -578,7 +578,7 @@ async function analyzeDrugImage(input) {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    model: "deepseek/deepseek-chat",
+                    model: "google/gemma-4-31b-it:free",
                     messages: [
                         { role: "system", content: buildSystemPrompt() },
                         ...conversationHistory
