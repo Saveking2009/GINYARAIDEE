@@ -426,3 +426,45 @@ body.dark .ob-sub,
 body.dark .ob-label {
     color: var(--text-muted);
 }
+
+/* --- ส่วนแก้ไขเพิ่มเติมสำหรับหน้าประวัติ (Dark Mode) --- */
+
+body.dark .chat-box .bubble.ai {
+    background: #1e293b; /* พื้นหลัง Bubble ให้สว่างกว่าพื้นหลังแอปเล็กน้อย */
+    color: #e2e8f0;      /* สีฟอนต์ขาวนวล (Off-white) อ่านง่ายและสบายตา */
+    border: 1px solid #334155; /* เพิ่มเส้นขอบบางๆ ให้ดูมีมิติ */
+}
+
+/* สีของ "ถาม: ..." ให้เด่นขึ้น */
+body.dark .bubble.ai strong, 
+body.dark .bubble.ai b {
+    color: #ff9f43; /* สีส้มที่สว่างขึ้นสำหรับโหมดมืด */
+}
+
+/* สีของเวลา (Timestamp) */
+body.dark .bubble.ai span[style*="font-size: 10px"],
+body.dark .bubble.ai .time-text {
+    color: #94a3b8 !important; /* สีเทาอ่อนเพื่อให้ไม่กวนสายตา */
+}
+
+/* ปรับปรุงปุ่ม "ล้างประวัติทั้งหมด" ให้ดูสะอาดตาขึ้น */
+body.dark .reset-history-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+body.dark .reset-btn-link {
+    color: #cbd5e1; /* สีขาวเทา */
+    text-decoration: none;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+body.dark .reset-btn-link:hover {
+    color: var(--primary); /* กลายเป็นสีส้มเมื่อเอาเมาส์วาง */
+}
+
+/* ปรับสีพื้นหลังหลักของหน้าประวัติ (ถ้าใช้คลาสเฉพาะ) */
+body.dark #history-screen {
+    background: #0f172a; 
+}
