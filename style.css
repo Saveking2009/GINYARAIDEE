@@ -9,10 +9,18 @@
     --radius-md: 22px;
     --shadow: 0 12px 30px rgba(0,0,0,0.06);
     --blue-link: #2e86de;
+    --text-main: #2d3436;    /* สีข้อความหลัก (เกือบดำ) */
+    --text-muted: #636e72;   /* สีข้อความรอง/คำอธิบาย */
+    --text-on-primary: #ffffff;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: "Sarabun", sans-serif; background: #222; color: var(--dark); line-height: 1.5; }
+body {
+    font-family: "Sarabun", sans-serif;
+    background: #222; 
+    color: var(--text-main); /* ใช้ตัวแปรที่สร้างใหม่ */
+    line-height: 1.5;
+}
 
 /* ===== SPLASH ===== */
 #splash {
@@ -282,7 +290,9 @@ body { font-family: "Sarabun", sans-serif; background: #222; color: var(--dark);
 }
 
 body.dark {
-    --card-bg: #1a3a5c;
+    --bg-app: #0f172a;       /* พื้นหลังเข้มขึ้นแบบ Navy */
+    --text-main: #f1f5f9;    /* ตัวหนังสือเกือบขาว */
+    --text-muted: #94a3b8;   /* ตัวหนังสือสีเทาอ่อน */
 }
 body.dark .app-container {
     background: #112233;
@@ -298,8 +308,8 @@ body.dark .nav-btn.active {
     color: #ffffff;
 }
 body.dark .bubble.ai {
-    background: #1a3a5c;
-    color: #cfe8ff;
+    background: #1e293b;
+    color: var(--text-main); /* ใช้สีที่สว่างขึ้น */
 }
 body.dark .bubble.user {
     background: #2a6496;
@@ -351,8 +361,8 @@ body.dark .user-badge-info strong {
     color: #7ab8e8;
 }
 body.dark .user-badge-info {
-    color: #5a8ab0;
-}
+    color: var(--text-muted);
+}   
 body.dark .edit-profile-btn {
     background: #1a3a5c;
     color: #7ab8e8;
@@ -412,9 +422,7 @@ body.dark .gender-btn.selected {
     background: #2a6496;
     color: #ffffff;
 }
-body.dark .ob-sub {
-    color: #5a8ab0;
-}
+body.dark .ob-sub, 
 body.dark .ob-label {
-    color: #7ab8e8;
+    color: var(--text-muted);
 }
