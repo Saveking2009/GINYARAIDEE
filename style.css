@@ -402,7 +402,9 @@ body.dark .reset-chat-bar span {
     color: #5a8ab0;
 }
 body.dark {
-    --card-bg: #1e2a3a;  /* หรือสีที่ใช้กับ card อื่นๆ ใน dark mode */
+    --card-bg: #1e293b;  /* แก้ให้ชัดเจนขึ้น */
+    --text-main: #f1f5f9;
+    --text-muted: #94a3b8;
 }
 
 body.dark .ob-input {
@@ -449,7 +451,7 @@ body.dark .bubble.ai .time-text {
 
 /* ปรับปรุงปุ่ม "ล้างประวัติทั้งหมด" ให้ดูสะอาดตาขึ้น */
 body.dark #history-container > div {
-    background: #1e293b !important;
+    background: #f3f4f7 !important;
     border: 1px solid #334155;
 }
 
