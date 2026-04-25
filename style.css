@@ -451,6 +451,16 @@ body.dark .bubble.ai .time-text {
 body.dark #history-container > div {
     background: #1e293b !important;
     border: 1px solid #334155;
+    color: #ffffff !important;
+}
+
+body.dark #history-container > div * {
+    color: #ffffff !important;
+}
+
+body.dark #history-container > div [style*="color: var(--primary)"],
+body.dark #history-container > div [style*="color:var(--primary)"] {
+    color: #ff9f43 !important;
 }
     
 

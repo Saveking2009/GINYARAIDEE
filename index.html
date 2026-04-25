@@ -681,15 +681,12 @@ function toggleTheme() {
 }
 
 (function () {
-    const saved = localStorage.getItem('theme');
-    if (saved === 'dark') {
-        document.body.classList.add('dark');
-        document.getElementById('theme-btn').innerText = '☀️';
-    } else {
-        // ถ้าไม่มีค่าหรือเป็น light ให้ลบ dark ออก
-        document.body.classList.remove('dark');
-        document.getElementById('theme-btn').innerText = '🌙';
-    }
+    localStorage.setItem('theme', 'light'); // reset ทุกครั้ง
+    document.body.classList.remove('dark');
+    window.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('theme-btn');
+        if (btn) btn.innerText = '🌙';
+    });
 })();
 
 if ('serviceWorker' in navigator) {
