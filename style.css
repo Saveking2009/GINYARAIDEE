@@ -448,9 +448,14 @@ body.dark .bubble.ai .time-text {
 }
 
 /* ปรับปรุงปุ่ม "ล้างประวัติทั้งหมด" ให้ดูสะอาดตาขึ้น */
-body.dark .reset-history-container {
-    text-align: center;
-    margin-top: 20px;
+body.dark #history-container > div {
+    background: #1e293b !important;
+    border: 1px solid #334155;
+}
+
+body.dark #history-container .time-text,
+body.dark #history-container [style*="color:#aaa"] {
+    color: #94a3b8 !important;
 }
 
 body.dark .reset-btn-link {
