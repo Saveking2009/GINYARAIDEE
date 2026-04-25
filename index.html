@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff7a18">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health AI Pro - น้องใจดีดูแลคุณ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;500;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .app-logo-img {
+            width: 160px;
+            height: auto;
+            border-radius: 35px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        .ob-logo-container {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .ob-logo-img {
+            width: 110px;
+            height: auto;
+            border-radius: 25px;
+        }
+        /* Image preview in chat */
+        .bubble-img {
+            max-width: 200px;
+            border-radius: 12px;
+            margin-top: 6px;
+            display: block;
+        }
+        /* Disabled send button */
+        .input-area button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+<div id="splash">
+    <div class="splash-logo-container" style="animation: bounce 1s infinite alternate; text-align: center;">
+        <img src="C:\Users\Saveking\Downloads\ChatGPT Image 24 เม.ย. 2569 21_18_08.png" class="app-logo-img" alt="Gin Ya Lai Dee">
+    </div>
+</div>
+
+<div class="app-container">
+
+    <div id="onboarding">
+        <div class="ob-logo-container">
+            <img src="C:\Users\Saveking\Downloads\ChatGPT Image 24 เม.ย. 2569 21_18_08.png" class="ob-logo-img" alt="Logo">
+        </div>
+        <div class="ob-title">ยินดีต้อนรับ!</div>
+        <div class="ob-sub">กรอกข้อมูลเพื่อให้น้องใจดีดูแลคุณได้ตรงจุดขึ้นนะคะ</div>
+
+        <div class="ob-card">
+            <span class="ob-label">👤 ข้อมูลกายภาพ</span>
+            <div class="ob-row" style="margin-bottom: 12px;">
+                <input type="number" id="ob-age" class="ob-input" placeholder="อายุ  (ปี)" min="1" max="120" style="flex: 1;">
+            </div>
+            <div class="ob-row" style="margin-bottom: 12px;">
+                <input type="number" id="ob-height" class="ob-input" placeholder="ส่วนสูง (ซม.)" style="flex: 1;">
+                <input type="number" id="ob-weight" class="ob-input" placeholder="น้ำหนัก (กก.)" style="flex: 1;">
+            </div>
+            <div class="gender-row">
+                <button class="gender-btn" onclick="selectGender('ชาย', this)">♂ ชาย</button>
+                <button class="gender-btn" onclick="selectGender('หญิง', this)">♀ หญิง</button>
+                <button class="gender-btn" onclick="selectGender('อื่น ๆ', this)">⚧ อื่น ๆ</button>
+            </div>
+        </div>
+
+        <div class="ob-card">
+            <span class="ob-label">🩺 ประวัติสุขภาพ</span>
+            <input type="text" id="ob-allergy" class="ob-input" placeholder="ยาที่แพ้ (เช่น เพนิซิลลิน หรือ ไม่มี)" style="margin-bottom: 10px;">
+            <input type="text" id="ob-chronic" class="ob-input" placeholder="โรคประจำตัว (เช่น เบาหวาน ความดัน หรือ ไม่มี)">
+        </div>
+
+        <button class="ob-start-btn" id="ob-btn" onclick="startApp()">เริ่มใช้งาน →</button>
+        <div class="ob-err" id="ob-err">⚠️ กรุณากรอกข้อมูลกายภาพให้ครบถ้วนนะคะ</div>
+    </div>
+
+    <div id="main-app">
+        <nav class="nav">
+            <button class="nav-btn active" onclick="showScreen('chat', this)">ถามอาการ</button>
+            <button class="nav-btn" onclick="showScreen('drug', this)">ตู้ยา</button>
+            <button class="nav-btn" onclick="showScreen('history', this)">ประวัติ</button>
+            <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">🌙</button>
+        </nav>
+
+        <div id="screen-chat" class="screen active">
+            <div class="medical-warning">
+                ⚠️ หากฉุกเฉินโทร 1669 ทันที ข้อมูลนี้ห้ามใช้แทนการวินิจฉัยของแพทย์
+            </div>
+
+            <div class="user-badge">
+                <div class="user-badge-info" id="badge-text"></div>
+                <button class="edit-profile-btn" onclick="goBackOnboarding()">✏️ แก้ไข</button>
+            </div>
+
+            <div class="reset-chat-bar">
+                <span style="font-size: 12px; color: #888; font-weight: 500;">ต้องการเปลี่ยนเรื่องคุย?</span>
+                <button class="reset-btn" onclick="resetChat()">+ เริ่มข้อความใหม่</button>
+            </div>
+
+            <div id="emergency-alert" class="emergency">🚨 อาการรุนแรง! โปรดพบแพทย์หรือโทร 1669 ด่วน</div>
+
+            <div class="chat-box" id="chat-box">
+                <div class="bubble ai" id="welcome-bubble"></div>
+            </div>
+
+            <div class="input-area">
+                <!-- ปุ่มกล้อง/รูป (ใช้ได้ทั้งมือถือและคอม) -->
+                <button id="cam-btn" onclick="document.getElementById('chat-cam-input').click()"
+                    style="background:none; border:none; font-size:22px; cursor:pointer; padding:0 5px;">📷</button>
+                <input type="file" id="chat-cam-input" accept="image/*" style="display:none" onchange="analyzeSymptomImage(this)">
+
+                <input type="text" id="chat-input" placeholder="พิมพ์ถามที่นี่..."
+                    onkeydown="if(event.key==='Enter' && !isSending)sendChat()">
+                <button id="send-btn" onclick="sendChat()">☁️</button>
+            </div>
+        </div>
+
+        <div id="screen-drug" class="screen">
+            <h2 style="font-weight:900; margin-bottom:5px; color: var(--primary);">ตู้ยาสามัญ</h2>
+            <p style="font-size: 11px; color: #888; margin-bottom: 15px;">อ้างอิง: คณะเภสัชศาสตร์ มหาวิทยาลัยมหิดล</p>
+            <div style="text-align:right; margin-bottom:10px;">
+                <button onclick="document.getElementById('drug-cam-input').click()"
+                    style="background:var(--primary); color:white; border:none; padding:8px 16px; border-radius:20px; font-size:13px; font-weight:800; cursor:pointer;">
+                    📷 ถ่ายรูปยา / เลือกรูปยา
+                </button>
+                <!-- ลบ capture="environment" ออก → ทำงานได้ทั้งคอมและมือถือ -->
+                <input type="file" id="drug-cam-input" accept="image/*" style="display:none" onchange="analyzeDrugImage(this)">
+            </div>
+            <input type="text" id="drug-search" placeholder="🔍 ค้นหายา หรือ อาการ..." oninput="searchDrug(this.value)"
+                style="width:100%; padding:15px; border-radius:var(--radius-md); border:none; margin-bottom:20px; box-shadow: var(--shadow); outline:none;">
+            <div id="drug-detail" style="display:none; padding: 25px; border-radius: var(--radius-xl); border: 2px dashed var(--primary); margin-bottom: 15px;"></div>
+            <div id="drug-list"></div>
+        </div>
+
+        <div id="screen-history" class="screen">
+            <h2 style="font-weight:900; margin-bottom:15px;">ประวัติการปรึกษา</h2>
+            <div id="history-container"></div>
+            <p onclick="clearHistory()" style="text-align:center; color:#ccc; font-size:12px; margin-top:20px; cursor:pointer;">ล้างประวัติทั้งหมด 🧹</p>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==================== ฐานข้อมูลยา ====================
+const DRUG_DB = [
+    { th:"พาราเซตามอล", en:"Paracetamol", cat:"ปวด/ไข้", tag:"ปวดหัว ลดไข้ ปวดฟัน", dose:"1-2 เม็ด ทุก 4-6 ชม.", warn:"ห้ามเกิน 8 เม็ดต่อวัน และระวังในผู้มีปัญหาโรคตับ", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ไอบูโพรเฟน", en:"Ibuprofen", cat:"ปวด/อักเสบ", tag:"ปวดประจำเดือน ปวดกล้ามเนื้อ", dose:"400mg หลังอาหารทันที", warn:"ห้ามทานขณะท้องว่าง ระวังในผู้ป่วยโรคกระเพาะ", ref:"https://www.pobpad.com/" },
+    { th:"นาโปรเซน", en:"Naproxen", cat:"ปวด/อักเสบ", tag:"ปวดข้อ ปวดเส้นเอ็น", dose:"1 เม็ด วันละ 2 ครั้ง หลังอาหาร", warn:"ระวังในผู้สูงอายุและผู้มีปัญหาโรคไต", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ไดโคลฟีแนค", en:"Diclofenac", cat:"ปวด/อักเสบ", tag:"ปวดข้ออักเสบ รูมาตอยด์", dose:"25-50mg หลังอาหารทันที", warn:"ห้ามใช้ในผู้ที่เป็นโรคหัวใจและหลอดเลือด", ref:"https://www.pobpad.com/" },
+    { th:"มีเฟนามิก", en:"Mefenamic Acid", cat:"ปวด/อักเสบ", tag:"ปวดประจำเดือน", dose:"500mg วันละ 3 ครั้ง หลังอาหาร", warn:"ไม่ควรใช้ติดต่อกันเกิน 7 วัน", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ซีลีค็อกซิบ", en:"Celecoxib", cat:"ปวด/อักเสบ", tag:"ปวดข้อเรื้อรัง ไม่ระคายกระเพาะ", dose:"200mg วันละ 1-2 ครั้ง", warn:"ห้ามใช้ในผู้ที่แพ้ยากลุ่มซัลฟา", ref:"https://www.pobpad.com/" },
+    { th:"อีโตริค็อกซิบ", en:"Etoricoxib", cat:"ปวด/อักเสบ", tag:"ปวดข้อเสื่อม ปวดกะทันหัน", dose:"60-120mg วันละครั้ง", warn:"ระวังในผู้มีความดันโลหิตสูง", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"แอสไพริน", en:"Aspirin", cat:"ปวด/อักเสบ", tag:"แก้ปวด ป้องกันลิ่มเลือด", dose:"ตามแพทย์สั่ง", warn:"ห้ามใช้ในเด็กที่ติดเชื้อไวรัส", ref:"https://www.pobpad.com/" },
+    { th:"เมโลซิแคม", en:"Meloxicam", cat:"ปวด/อักเสบ", tag:"ปวดข้อเข่า ข้ออักเสบ", dose:"7.5-15mg วันละครั้ง หลังอาหาร", warn:"ระวังในผู้ป่วยโรคไต", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"อินโดเมทาซิน", en:"Indomethacin", cat:"ปวด/อักเสบ", tag:"โรคเก๊าท์เฉียบพลัน", dose:"25-50mg วันละ 2-3 ครั้ง", warn:"อาจทำให้เวียนศีรษะรุนแรง", ref:"https://www.pobpad.com/" },
+    { th:"ไพโรซิแคม", en:"Piroxicam", cat:"ปวด/อักเสบ", tag:"ปวดข้อและกระดูก", dose:"10-20mg วันละครั้ง", warn:"ระคายเคืองกระเพาะอาหารสูง", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ซัลซาลาซีน", en:"Sulfasalazine", cat:"อักเสบ", tag:"ลำไส้อักเสบ ข้ออักเสบ", dose:"ตามแพทย์สั่ง", warn:"ระวังในผู้แพ้ยาซัลฟา", ref:"https://www.pobpad.com/" },
+    { th:"เด็กซาเมทาโซน", en:"Dexamethasone", cat:"สเตียรอยด์", tag:"ต้านอักเสบรุนแรง กดภูมิ", dose:"ตามแพทย์สั่ง", warn:"ห้ามซื้อใช้เองเด็ดขาด", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ไฮโดรคอร์ติโซน", en:"Hydrocortisone", cat:"สเตียรอยด์", tag:"ลดการอักเสบของร่างกาย", dose:"ตามแพทย์สั่ง", warn:"มีผลข้างเคียงสูงหากใช้ระยะยาว", ref:"https://www.pobpad.com/" },
+    { th:"เพรดนิโซโลน", en:"Prednisolone", cat:"สเตียรอยด์", tag:"ภูมิแพ้ผิวหนัง อักเสบ", dose:"ตามแพทย์สั่ง", warn:"ห้ามหยุดยาเองทันที", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ลอราทาดีน", en:"Loratadine", cat:"แก้แพ้", tag:"แพ้อากาศ ลมพิษ ไม่ค่อยง่วง", dose:"วันละ 1 เม็ด", warn:"ระวังในผู้ป่วยโรคตับและไต", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"เซทิริซีน", en:"Cetirizine", cat:"แก้แพ้", tag:"น้ำมูกไหล คันตา ผื่นคัน", dose:"วันละ 1 เม็ดก่อนนอน", warn:"อาจทำให้ง่วงนอนในบางราย", ref:"https://www.pobpad.com/" },
+    { th:"เฟโซเฟนาดีน", en:"Fexofenadine", cat:"แก้แพ้", tag:"แพ้อากาศ ลมพิษ ไม่ง่วงนอน", dose:"60-180mg วันละครั้ง", warn:"หลีกเลี่ยงน้ำผลไม้บางชนิด", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"คลอร์เฟนิรามีน", en:"Chlorpheniramine", cat:"แก้แพ้", tag:"ลดน้ำมูก แก้คัน ยาเหลือง", dose:"1 เม็ด ทุก 4-6 ชม.", warn:"ทำให้ง่วงนอนมาก", ref:"https://www.pobpad.com/" },
+    { th:"เดสลอราทาดีน", en:"Desloratadine", cat:"แก้แพ้", tag:"แพ้อากาศเรื้อรัง ไม่ง่วง", dose:"5mg วันละครั้ง", warn:"ระวังในเด็กเล็กและสตรีมีครรภ์", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"บรอมเฮกซีน", en:"Bromhexine", cat:"แก้ไอ", tag:"ละลายเสมหะ", dose:"1 เม็ด วันละ 3 ครั้ง", warn:"ระวังในผู้แผลในกระเพาะ", ref:"https://www.pobpad.com/" },
+    { th:"กัวไอเฟเนซิน", en:"Guaifenesin", cat:"แก้ไอ", tag:"ขับเสมหะ", dose:"1-2 เม็ด ทุก 4 ชม.", warn:"ดื่มน้ำตามมากๆ", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"เดกซ์โทรเมทอร์แฟน", en:"Dextromethorphan", cat:"แก้ไอ", tag:"แก้ไอแห้ง ไอไม่มีเสมหะ", dose:"1 เม็ด ทุก 6-8 ชม.", warn:"ไม่ใช้ในรายที่มีเสมหะข้น", ref:"https://www.pobpad.com/" },
+    { th:"คาร์โบซิสเทอีน", en:"Carbocisteine", cat:"แก้ไอ", tag:"ละลายเสมหะเหนียว", dose:"2 เม็ด วันละ 3 ครั้ง", warn:"ระวังในผู้ป่วยหอบหืด", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ซัลบูทามอล", en:"Salbutamol", cat:"ระบบทางเดินหายใจ", tag:"ขยายหลอดลม หอบหืด", dose:"พ่นเมื่อมีอาการ", warn:"อาจทำให้ใจสั่น", ref:"https://www.pobpad.com/" },
+    { th:"ธีโอฟิลลีน", en:"Theophylline", cat:"ระบบทางเดินหายใจ", tag:"ขยายหลอดลม", dose:"ตามแพทย์สั่ง", warn:"ระวังปฏิกิริยากับคาเฟอีน", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"มอนทีลูคาสท์", en:"Montelukast", cat:"ระบบทางเดินหายใจ", tag:"ป้องกันหอบหืด ภูมิแพ้", dose:"10mg วันละครั้งตอนเย็น", warn:"อาจมีผลต่ออารมณ์", ref:"https://www.pobpad.com/" },
+    { th:"ออกซีเมทาโซลีน", en:"Oxymetazoline", cat:"ระบบทางเดินหายใจ", tag:"ยาพ่นจมูก แก้คัดจมูก", dose:"พ่นวันละ 2 ครั้ง", warn:"ไม่ใช้ติดต่อกันเกิน 5 วัน", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"บูดิโซไนด์", en:"Budesonide", cat:"ระบบทางเดินหายใจ", tag:"พ่นจมูก/คอ ลดอักเสบ", dose:"ตามแพทย์สั่ง", warn:"บ้วนปากหลังพ่นเพื่อกันเชื้อรา", ref:"https://www.pobpad.com/" },
+    { th:"ซูโดอีเฟดรีน", en:"Pseudoephedrine", cat:"ระบบทางเดินหายใจ", tag:"แก้คัดจมูกรุนแรง", dose:"ตามแพทย์สั่ง", warn:"ยาควบคุมพิเศษ ระวังใจสั่น", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ยาลดกรด (น้ำ)", en:"Antacid", cat:"ท้อง", tag:"แสบท้อง กรดเกิน", dose:"1-2 ช้อนโต๊ะ หลังอาหาร", warn:"ห้ามทานพร้อมยาอื่น", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"โอเมพราโซล", en:"Omeprazole", cat:"ท้อง", tag:"ลดกรด โรคกระเพาะ", dose:"1 เม็ด ก่อนอาหาร 30 นาที", warn:"ควรทานต่อเนื่องตามสั่ง", ref:"https://www.pobpad.com/" },
+    { th:"ดอมเพอริโดน", en:"Domperidone", cat:"ท้อง", tag:"แก้คลื่นไส้ อาเจียน ท้องอืด", dose:"1 เม็ด ก่อนอาหาร", warn:"ห้ามใช้ติดต่อกันนานเกินไป", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ไฮออสซีน", en:"Hyoscine", cat:"ท้อง", tag:"ปวดท้องเกร็ง", dose:"1 เม็ด วันละ 3 ครั้ง", warn:"อาจทำให้ปากแห้ง ตาพร่า", ref:"https://www.pobpad.com/" },
+    { th:"โลเพอราไมด์", en:"Loperamide", cat:"ท้อง", tag:"ยาหยุดถ่าย", dose:"ตามอาการ", warn:"ห้ามใช้ถ้าท้องเสียจากติดเชื้อ", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ผงเกลือแร่", en:"ORS", cat:"ท้อง", tag:"ท้องเสีย เสียเหงื่อ", dose:"จิบบ่อยๆ", warn:"ไม่ใช่ยาหยุดถ่าย", ref:"https://www.pobpad.com/" },
+    { th:"ไซเมทิโคน", en:"Simethicone", cat:"ท้อง", tag:"ขับลม ท้องอืด", dose:"1 เม็ด หลังอาหาร", warn:"เคี้ยวให้ละเอียด", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"บิซาโคดิล", en:"Bisacodyl", cat:"ท้อง", tag:"ยาถ่าย ท้องผูก", dose:"1-2 เม็ด ก่อนนอน", warn:"ไม่ใช้ติดต่อกันนาน", ref:"https://www.pobpad.com/" },
+    { th:"แมกนีเซียมไฮดรอกไซด์", en:"MOM", cat:"ท้อง", tag:"ยาระบาย ลดกรด", dose:"ตามข้างขวด", warn:"ห้ามใช้ในโรคไต", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"แลคตูโลส", en:"Lactulose", cat:"ท้อง", tag:"ยาระบายชนิดน้ำ", dose:"ตามแพทย์สั่ง", warn:"อาจทำให้ท้องอืดในช่วงแรก", ref:"https://www.pobpad.com/" },
+    { th:"รินิทิดีน", en:"Ranitidine", cat:"ท้อง", tag:"ลดกรดในกระเพาะ", dose:"150-300mg", warn:"ปัจจุบันมีการเรียกคืนบางยี่ห้อ", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ยาธาตุน้ำขาว", en:"Salol et Menthol", cat:"ท้อง", tag:"แก้ปวดท้อง ท้องเสีย", dose:"1 ช้อนโต๊ะ", warn:"ระวังในผู้แพ้แอสไพริน", ref:"https://www.pobpad.com/" },
+    { th:"ยาธาตุน้ำแดง", en:"Stomachic Mixture", cat:"ท้อง", tag:"ช่วยย่อย ขับลม", dose:"1-2 ช้อนโต๊ะ", warn:"มีส่วนผสมของโซเดียม", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ผงถ่านกัมมันต์", en:"Activated Charcoal", cat:"ท้อง", tag:"ดูดซับสารพิษ", dose:"2-3 เม็ด", warn:"อุจจาระจะมีสีดำ", ref:"https://www.pobpad.com/" },
+    { th:"มีบีเวอรีน", en:"Mebeverine", cat:"ท้อง", tag:"ลำไส้แปรปรวน (IBS)", dose:"1 เม็ด ก่อนอาหาร", warn:"ระวังในผู้แพ้ยา", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ซัลฟาราลเฟต", en:"Sucralfate", cat:"ท้อง", tag:"เคลือบกระเพาะอาหาร", dose:"ทานตอนท้องว่าง", warn:"อาจทำให้ท้องผูก", ref:"https://www.pobpad.com/" },
+    { th:"แพนโทพราโซล", en:"Pantoprazole", cat:"ท้อง", tag:"ลดกรดรุนแรง", dose:"ตามแพทย์สั่ง", warn:"ทานก่อนอาหาร 30-60 นาที", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ราเบพราโซล", en:"Rabeprazole", cat:"ท้อง", tag:"กรดไหลย้อน", dose:"วันละ 1 ครั้ง", warn:"กลืนทั้งเม็ด ห้ามเคี้ยว", ref:"https://www.pobpad.com/" },
+    { th:"มัลติเอนไซม์", en:"Digestive Enzyme", cat:"ท้อง", tag:"ช่วยย่อยอาหาร", dose:"พร้อมอาหาร", warn:"ไม่ใช้ในตับอ่อนอักเสบเฉียบพลัน", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ยาแก้เมารถ", en:"Dimenhydrinate", cat:"ท้อง/ประสาท", tag:"เมารถ เมาเรือ", dose:"1 เม็ดก่อนเดินทาง 30 นาที", warn:"ทำให้ง่วงนอนมาก", ref:"https://www.pobpad.com/" },
+    { th:"อะม็อกซีซิลลิน", en:"Amoxicillin", cat:"ยาฆ่าเชื้อ", tag:"เจ็บคอ แผลอักเสบ", dose:"ตามแพทย์สั่ง", warn:"ต้องทานให้ครบชุด", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ไดคล็อกซาซิลลิน", en:"Dicloxacillin", cat:"ยาฆ่าเชื้อ", tag:"แผลติดเชื้อ ผิวหนัง", dose:"ก่อนอาหาร 1 ชม.", warn:"ระวังถ้าแพ้เพนิซิลลิน", ref:"https://www.pobpad.com/" },
+    { th:"นอร์ฟล็อกซาซิน", en:"Norfloxacin", cat:"ยาฆ่าเชื้อ", tag:"ท้องเสียติดเชื้อ", dose:"วันละ 2 ครั้ง", warn:"ดื่มน้ำตามมากๆ", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"อะซิโธรมัยซิน", en:"Azithromycin", cat:"ยาฆ่าเชื้อ", tag:"ติดเชื้อทางเดินหายใจ", dose:"วันละครั้ง", warn:"ทานติดต่อกัน 3-5 วัน", ref:"https://www.pobpad.com/" },
+    { th:"ร็อกซิโทรมัยซิน", en:"Roxithromycin", cat:"ยาฆ่าเชื้อ", tag:"คออักเสบ ไซนัส", dose:"ก่อนอาหาร 15 นาที", warn:"ระวังในผู้มีปัญหาตับ", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"คลาริโทรมัยซิน", en:"Clarithromycin", cat:"ยาฆ่าเชื้อ", tag:"ฆ่าเชื้อในกระเพาะ", dose:"ตามแพทย์สั่ง", warn:"อาจทำให้รสชาติในปากเปลี่ยน", ref:"https://www.pobpad.com/" },
+    { th:"ไซโปรฟล็อกซาซิน", en:"Ciprofloxacin", cat:"ยาฆ่าเชื้อ", tag:"ติดเชื้อทางเดินปัสสาวะ", dose:"วันละ 2 ครั้ง", warn:"ไม่ทานพร้อมนมหรือยาลดกรด", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"เลโวฟล็อกซาซิน", en:"Levofloxacin", cat:"ยาฆ่าเชื้อ", tag:"ปอดบวม ไซนัส", dose:"วันละครั้ง", warn:"ระวังปวดเส้นเอ็น", ref:"https://www.pobpad.com/" },
+    { th:"ด็อกซีไซคลีน", en:"Doxycycline", cat:"ยาฆ่าเชื้อ", tag:"รักษาสิว ติดเชื้อแบคทีเรีย", dose:"หลังอาหารทันที", warn:"ห้ามใช้ในเด็กและคนท้อง", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"คลินดามัยซิน", en:"Clindamycin", cat:"ยาฆ่าเชื้อ", tag:"สิวอักเสบ ติดเชื้อรุนแรง", dose:"ตามแพทย์สั่ง", warn:"ดื่มน้ำตามเยอะๆ กันระคายเคืองคอ", ref:"https://www.pobpad.com/" },
+    { th:"เมโทรนิดาโซล", en:"Metronidazole", cat:"ยาฆ่าเชื้อ", tag:"ติดเชื้อในช่องท้อง/ช่องคลอด", dose:"ตามแพทย์สั่ง", warn:"ห้ามดื่มแอลกอฮอล์", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ฟอสโฟมัยซิน", en:"Fosfomycin", cat:"ยาฆ่าเชื้อ", tag:"กระเพาะปัสสาวะอักเสบ", dose:"ชงดื่มครั้งเดียว", warn:"ทานตอนท้องว่างก่อนนอน", ref:"https://www.pobpad.com/" },
+    { th:"อะไซโคลเวียร์", en:"Acyclovir", cat:"ยาฆ่าเชื้อไวรัส", tag:"เริม งูสวัส", dose:"วันละ 5 ครั้ง", warn:"ดื่มน้ำมากๆ", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"โอเซลทามิเวียร์", en:"Oseltamivir", cat:"ยาฆ่าเชื้อไวรัส", tag:"ไข้หวัดใหญ่", dose:"วันละ 2 ครั้ง", warn:"เริ่มใช้ภายใน 48 ชม. ที่มีอาการ", ref:"https://www.pobpad.com/" },
+    { th:"โคลไตรมาโซล", en:"Clotrimazole", cat:"ยาฆ่าเชื้อรา", tag:"เชื้อราผิวหนัง ช่องคลอด", dose:"ทา/เหน็บ", warn:"ใช้ต่อเนื่องจนครบ", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ฟลูโคนาโซล", en:"Fluconazole", cat:"ยาฆ่าเชื้อรา", tag:"เชื้อราในอวัยวะภายใน", dose:"ตามแพทย์สั่ง", warn:"ระวังปฏิกิริยากับยาอื่น", ref:"https://www.pobpad.com/" },
+    { th:"ไอทราโคนาโซล", en:"Itraconazole", cat:"ยาฆ่าเชื้อรา", tag:"เชื้อราที่เล็บ/ผิวหนัง", dose:"หลังอาหารทันที", warn:"ต้องการกรดในกระเพาะเพื่อดูดซึม", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"คีโตโคนาโซล", en:"Ketoconazole", cat:"ยาฆ่าเชื้อรา", tag:"รังแค เชื้อรา", dose:"ทา/สระ/ทาน", warn:"แบบทานมีผลต่อตับสูง", ref:"https://www.pobpad.com/" },
+    { th:"นิสแตติน", en:"Nystatin", cat:"ยาฆ่าเชื้อรา", tag:"เชื้อราในปาก", dose:"อมกลั้วปาก", warn:"ห้ามดื่มน้ำตามทันที", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"อัลเบนดาโซล", en:"Albendazole", cat:"ยาถ่ายพยาธิ", tag:"พยาธิตัวกลม ตัวตืด", dose:"เคี้ยวให้ละเอียด", warn:"ห้ามใช้ในคนท้อง", ref:"https://www.pobpad.com/" },
+    { th:"เมทฟอร์มิน", en:"Metformin", cat:"เบาหวาน", tag:"ลดน้ำตาล", dose:"หลังอาหาร", warn:"อาจทำให้ท้องเสียในช่วงแรก", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"กลิพิไซด์", en:"Glipizide", cat:"เบาหวาน", tag:"กระตุ้นอินซูลิน", dose:"ก่อนอาหาร 30 นาที", warn:"ระวังน้ำตาลในเลือดต่ำ", ref:"https://www.pobpad.com/" },
+    { th:"แอมโลดิพีน", en:"Amlodipine", cat:"ความดัน", tag:"ลดความดัน", dose:"วันละครั้ง", warn:"ระวังข้อเท้าบวม", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"อีนาลาพริล", en:"Enalapril", cat:"ความดัน", tag:"ลดความดัน", dose:"วันละครั้ง", warn:"อาจทำให้ไอแห้ง", ref:"https://www.pobpad.com/" },
+    { th:"ลอซาร์แทน", en:"Losartan", cat:"ความดัน", tag:"ลดความดัน", dose:"วันละครั้ง", warn:"ห้ามใช้ในคนท้อง", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"อะเทนโนลอล", en:"Atenolol", cat:"ความดัน/หัวใจ", tag:"ลดอัตราเต้นหัวใจ", dose:"ตามแพทย์สั่ง", warn:"ห้ามหยุดยาเอง", ref:"https://www.pobpad.com/" },
+    { th:"ซิมวาสแตติน", en:"Simvastatin", cat:"ไขมัน", tag:"ลดคอเลสเตอรอล", dose:"ก่อนนอน", warn:"ระวังปวดกล้ามเนื้อ", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"อะทอร์วาสแตติน", en:"Atorvastatin", cat:"ไขมัน", tag:"ลดไขมันเลือด", dose:"วันละครั้ง", warn:"ห้ามทานกับน้ำเกรปฟรุต", ref:"https://www.pobpad.com/" },
+    { th:"เจมไฟโบรซิล", en:"Gemfibrozil", cat:"ไขมัน", tag:"ลดไตรกลีเซอไรด์", dose:"ก่อนอาหาร", warn:"ระวังนิ่วในถุงน้ำดี", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ฟีโนไฟเบรต", en:"Fenofibrate", cat:"ไขมัน", tag:"ลดไขมัน", dose:"พร้อมอาหาร", warn:"ระวังผลข้างเคียงต่อตับ", ref:"https://www.pobpad.com/" },
+    { th:"วาร์ฟาริน", en:"Warfarin", cat:"หัวใจ", tag:"ต้านลิ่มเลือด", dose:"ตามแพทย์สั่งเคร่งครัด", warn:"ระวังเลือดออกผิดปกติ", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ยาละลายลิ่มเลือด", en:"Clopidogrel", cat:"หัวใจ", tag:"ป้องกันพยาธิสภาพหลอดเลือด", dose:"วันละครั้ง", warn:"แจ้งแพทย์ทุกครั้งก่อนผ่าตัด", ref:"https://www.pobpad.com/" },
+    { th:"ลิโวไทโรซีน", en:"Levothyroxine", cat:"ฮอร์โมน", tag:"ไทรอยด์ต่ำ", dose:"ตอนเช้า ท้องว่าง", warn:"ทานห่างจากนม 4 ชม.", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"สไปโรโนแลคโตน", en:"Spironolactone", cat:"ขับปัสสาวะ", tag:"ลดบวม ความดัน", dose:"ตามแพทย์สั่ง", warn:"ระวังโพแทสเซียมสูง", ref:"https://www.pobpad.com/" },
+    { th:"อัลโลพูรินอล", en:"Allopurinol", cat:"โรคเก๊าท์", tag:"ลดกรดยูริก", dose:"หลังอาหาร", warn:"หากมีผื่นรีบพบแพทย์", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"โพวิโดน-ไอโอดีน", en:"Povidone-Iodine", cat:"ผิวหนัง", tag:"ใส่แผลสด", dose:"ทาที่แผล", warn:"ระวังถ้าแพ้ไอโอดีน", ref:"https://www.pobpad.com/" },
+    { th:"คาลาไมน์", en:"Calamine", cat:"ผิวหนัง", tag:"แก้คัน ผดผื่น", dose:"ทาบริเวณที่คัน", warn:"ยาใช้ภายนอกห้ามกิน", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"น้ำตาเทียม", en:"Artificial Tears", cat:"ตา", tag:"ตาแห้ง", dose:"หยอดเมื่อเคืองตา", warn:"ระวังการปนเปื้อนที่ปลายขวด", ref:"https://www.pobpad.com/" },
+    { th:"ไตรแอมซิโนโลน (ปาก)", en:"Triamcinolone Paste", cat:"ปาก", tag:"ร้อนใน แผลในปาก", dose:"ป้ายก่อนนอน", warn:"ห้ามถู ให้แปะไว้", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"เบนโซอิลเพอร์ออกไซด์", en:"Benzoyl Peroxide", cat:"ผิวหนัง", tag:"รักษาสิว", dose:"ทาก่อนล้างหน้า", warn:"อาจทำให้หน้าแห้งลอก", ref:"https://www.pobpad.com/" },
+    { th:"น้ำเกลือล้างจมูก", en:"Normal Saline", cat:"จมูก", tag:"ล้างจมูก ภูมิแพ้", dose:"ล้างตามต้องการ", warn:"ใช้ขวดล้างที่สะอาด", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"วิตามินซี", en:"Vitamin C", cat:"วิตามิน", tag:"หวัด เลือดออกตามไรฟัน", dose:"500-1000mg", warn:"ทานหลังอาหาร", ref:"https://www.pobpad.com/" },
+    { th:"วิตามินบี 1-6-12", en:"Vitamin B Complex", cat:"วิตามิน", tag:"บำรุงประสาท", dose:"วันละเม็ด", warn:"ปัสสาวะจะมีสีเหลืองเข้ม", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"แคลเซียม", en:"Calcium Carbonate", cat:"วิตามิน", tag:"บำรุงกระดูก", dose:"หลังอาหาร", warn:"อาจทำให้ท้องผูก", ref:"https://www.pobpad.com/" },
+    { th:"ธาตุเหล็ก", en:"Ferrous Fumarate", cat:"วิตามิน", tag:"บำรุงเลือด", dose:"วันละครั้ง", warn:"อุจจาระสีดำเป็นปกติ", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ฟ้าทะลายโจร", en:"Andrographis paniculata", cat:"สมุนไพร", tag:"เจ็บคอ แก้ไข้", dose:"ตามฉลาก", warn:"ห้ามใช้ในคนท้อง/ให้นมบุตร", ref:"https://www.pobpad.com/" },
+    { th:"ขมิ้นชัน", en:"Turmeric", cat:"สมุนไพร", tag:"ท้องอืด ท้องเฟ้อ", dose:"หลังอาหาร", warn:"ระวังในผู้เป็นนิ่วในถุงน้ำดี", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"มะขามแขก", en:"Senna", cat:"สมุนไพร/ท้อง", tag:"ยาระบาย", dose:"ก่อนนอน", warn:"ไม่ควรใช้ติดต่อกันนาน", ref:"https://www.pobpad.com/" },
+    { th:"น้ำมันปลา", en:"Fish Oil", cat:"อาหารเสริม", tag:"บำรุงสมอง", dose:"วันละครั้ง", warn:"ระวังในผู้แพ้อาหารทะเล", ref:"https://pharmacy.mahidol.ac.th/" },
+    { th:"ซิงค์ (สังกะสี)", en:"Zinc", cat:"วิตามิน", tag:"รักษาสิว เสริมภูมิ", dose:"วันละครั้ง", warn:"ไม่ทานตอนท้องว่าง", ref:"https://www.pobpad.com/" }
+];
+
+const DANGER_WORDS = ["แน่นหน้าอก","หายใจไม่ออก","ชัก","ปากเบี้ยว","แขนขาอ่อนแรง","เลือดไม่หยุด","สลบ"];
+const API_KEY = "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";
+
+let selectedGender = "";
+let isSending = false;
+
+// ==================== Conversation History ====================
+// เก็บ history ของการสนทนา (ไม่รวม system prompt)
+let conversationHistory = [];
+
+function selectGender(val, btn) {
+    selectedGender = val;
+    document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+}
+
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        document.getElementById('splash').classList.add('hidden');
+        const savedAge = localStorage.getItem('userAge');
+        const savedGender = localStorage.getItem('userGender');
+        if (savedAge && savedGender) {
+            launchApp();
+        } else {
+            document.getElementById('onboarding').classList.add('active');
+        }
+    }, 2000);
+    searchDrug("");
+});
+
+function startApp() {
+    const age = document.getElementById('ob-age').value.trim();
+    const height = document.getElementById('ob-height').value.trim();
+    const weight = document.getElementById('ob-weight').value.trim();
+    const err = document.getElementById('ob-err');
+
+    if (!age || !selectedGender || !height || !weight) {
+        err.innerHTML = "⚠️ กรุณากรอกข้อมูลกายภาพให้ครบถ้วนนะคะ";
+        err.style.display = "block";
+        return;
+    }
+
+    err.style.display = "none";
+    localStorage.setItem('userAge', age);
+    localStorage.setItem('userGender', selectedGender);
+    localStorage.setItem('userHeight', height);
+    localStorage.setItem('userWeight', weight);
+    localStorage.setItem('userAllergy', document.getElementById('ob-allergy').value.trim() || "ไม่มี");
+    localStorage.setItem('userChronic', document.getElementById('ob-chronic').value.trim() || "ไม่มี");
+    launchApp();
+}
+
+function launchApp() {
+    document.getElementById('onboarding').classList.remove('active');
+    document.getElementById('main-app').classList.add('active');
+    updateBadge();
+    setWelcomeMessage();
+}
+
+function updateBadge() {
+    const age = localStorage.getItem('userAge') || '-';
+    const gender = localStorage.getItem('userGender') || '-';
+    const height = localStorage.getItem('userHeight') || '-';
+    const weight = localStorage.getItem('userWeight') || '-';
+    const allergy = localStorage.getItem('userAllergy') || 'ไม่มี';
+
+    document.getElementById('badge-text').innerHTML =
+        `<strong>${gender} ${age} ปี (${height} ซม./${weight} กก.)</strong> &nbsp;|&nbsp; แพ้: ${allergy}`;
+}
+
+function setWelcomeMessage() {
+    const age = localStorage.getItem('userAge') || '?';
+    const gender = localStorage.getItem('userGender') || '?';
+    const bubble = document.getElementById('welcome-bubble');
+    if (bubble) {
+        bubble.innerText = `สวัสดีค่ะ คุณ${gender} อายุ ${age} ปี 😊\nแจ้งอาการของคุณได้เลยนะคะ น้องใจดีจะวิเคราะห์เบื้องต้นให้ค่ะ ✨`;
+    }
+}
+
+function goBackOnboarding() {
+    document.getElementById('ob-age').value = localStorage.getItem('userAge') || '';
+    document.getElementById('ob-height').value = localStorage.getItem('userHeight') || '';
+    document.getElementById('ob-weight').value = localStorage.getItem('userWeight') || '';
+    document.getElementById('ob-allergy').value = localStorage.getItem('userAllergy') || '';
+    document.getElementById('ob-chronic').value = localStorage.getItem('userChronic') || '';
+    const gender = localStorage.getItem('userGender');
+    selectedGender = gender;
+    document.querySelectorAll('.gender-btn').forEach(b => {
+        b.classList.toggle('selected', b.innerText.includes(gender));
+    });
+    document.getElementById('main-app').classList.remove('active');
+    document.getElementById('onboarding').classList.add('active');
+}
+
+function showScreen(id, btn) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+    btn.classList.add('active');
+    if (id === 'history') renderHistory();
+}
+
+// ==================== ฟังก์ชัน UI Helper ====================
+function setLoading(state) {
+    isSending = state;
+    document.getElementById('send-btn').disabled = state;
+    document.getElementById('cam-btn').disabled = state;
+    document.getElementById('chat-input').disabled = state;
+}
+
+function buildSystemPrompt() {
+    const userAge = localStorage.getItem('userAge') || 'ไม่ระบุ';
+    const userGender = localStorage.getItem('userGender') || 'ไม่ระบุ';
+    const allergyInfo = localStorage.getItem('userAllergy') || 'ไม่มี';
+    const chronicInfo = localStorage.getItem('userChronic') || 'ไม่มี';
+    const userHeight = localStorage.getItem('userHeight') || 'ไม่ระบุ';
+    const userWeight = localStorage.getItem('userWeight') || 'ไม่ระบุ';
+    return `คุณคือ AI ผู้ช่วยสุขภาพชื่อ "น้องใจดี" ตอบภาษาไทยน่ารักและเป็นกันเอง
+ข้อมูลผู้ใช้:
+- เพศ: ${userGender}
+- อายุ: ${userAge} ปี
+- ส่วนสูง: ${userHeight} ซม. / น้ำหนัก: ${userWeight} กก.
+- ประวัติแพ้ยา: ${allergyInfo}
+- โรคประจำตัว: ${chronicInfo}
+
+กฎสำคัญ:
+1. ห้ามแนะนำยาที่แพ้ (${allergyInfo}) โดยเด็ดขาด
+2. สรุปอาการก่อนให้คำแนะนำเสมอ
+3. แนะนำพบแพทย์หากอาการไม่ดีขึ้นหรืออาการรุนแรง
+4. จำบทสนทนาก่อนหน้าและต่อเนื่องได้ตามปกติ`;
+}
+
+// ==================== ส่งข้อความแชท ====================
+async function sendChat() {
+    if (isSending) return;
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const chatBox = document.getElementById('chat-box');
+    const isDanger = DANGER_WORDS.some(k => text.includes(k));
+    document.getElementById('emergency-alert').style.display = isDanger ? "block" : "none";
+
+    // แสดง bubble ผู้ใช้
+    chatBox.innerHTML += `<div class="bubble user">${text}</div>`;
+    input.value = "";
+    setLoading(true);
+
+    // เพิ่มเข้า history
+    conversationHistory.push({ role: "user", content: text });
+
+    const loading = document.createElement('div');
+    loading.className = "bubble ai";
+    loading.innerText = "น้องใจดีกำลังวิเคราะห์ให้... 💭";
+    chatBox.appendChild(loading);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    try {
+        const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "deepseek/deepseek-chat",
+                messages: [
+                    { role: "system", content: buildSystemPrompt() },
+                    ...conversationHistory   // ส่ง history ทั้งหมด
+                ]
+            })
+        });
+        const data = await res.json();
+        const reply = data.choices[0].message.content;
+
+        // เพิ่ม reply เข้า history ด้วย
+        conversationHistory.push({ role: "assistant", content: reply });
+
+        loading.innerHTML = reply + `<a href="https://ddc.moph.go.th/" target="_blank" class="ai-source">🔗 อ้างอิงเบื้องต้น: กรมควบคุมโรค</a>`;
+        saveHistory(text, reply);
+    } catch (e) {
+        loading.innerText = "ขออภัยค่ะ ระบบขัดข้องเล็กน้อย ลองปรึกษาสายด่วน 1669 นะคะ";
+        // ลบ message ล่าสุดออกจาก history เพราะ error
+        conversationHistory.pop();
+    }
+
+    setLoading(false);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// ==================== วิเคราะห์รูปอาการ ====================
+async function analyzeSymptomImage(input) {
+    if (!input.files || !input.files[0]) return;
+    if (isSending) return;
+
+    const file = input.files[0];
+    const chatBox = document.getElementById('chat-box');
+
+    // แสดง preview รูปที่ผู้ใช้ส่ง
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const base64 = e.target.result; // data:image/xxx;base64,...
+        const base64Data = base64.split(',')[1];
+        const mimeType = file.type;
+
+        chatBox.innerHTML += `
+            <div class="bubble user">
+                📷 ส่งรูปอาการ<br>
+                <img src="${base64}" class="bubble-img" alt="อาการ">
+            </div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+        setLoading(true);
+
+        const loading = document.createElement('div');
+        loading.className = "bubble ai";
+        loading.innerText = "น้องใจดีกำลังดูรูปให้... 🔍";
+        chatBox.appendChild(loading);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // เพิ่มข้อความ context เข้า history ก่อน
+        const userMsg = {
+            role: "user",
+            content: [
+                {
+                    type: "image_url",
+                    image_url: { url: `data:${mimeType};base64,${base64Data}` }
+                },
+                {
+                    type: "text",
+                    text: "นี่คือรูปอาการของฉัน ช่วยวิเคราะห์เบื้องต้นให้หน่อยนะคะ"
+                }
+            ]
+        };
+        conversationHistory.push(userMsg);
+
+        try {
+            // ใช้ model ที่รองรับ vision (deepseek-chat รองรับรูปภาพ)
+            const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${API_KEY}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: "deepseek/deepseek-chat",
+                    messages: [
+                        { role: "system", content: buildSystemPrompt() },
+                        ...conversationHistory
+                    ]
+                })
+            });
+            const data = await res.json();
+            const reply = data.choices[0].message.content;
+
+            conversationHistory.push({ role: "assistant", content: reply });
+            loading.innerHTML = reply + `<a href="https://ddc.moph.go.th/" target="_blank" class="ai-source">🔗 อ้างอิงเบื้องต้น: กรมควบคุมโรค</a>`;
+            saveHistory("[รูปอาการ]", reply);
+        } catch (e) {
+            loading.innerText = "ขออภัยค่ะ ไม่สามารถวิเคราะห์รูปได้ในขณะนี้";
+            conversationHistory.pop();
+        }
+
+        setLoading(false);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        input.value = ""; // reset input file
+    };
+    reader.readAsDataURL(file);
+}
+
+// ==================== วิเคราะห์รูปยา ====================
+async function analyzeDrugImage(input) {
+    if (!input.files || !input.files[0]) return;
+
+    const file = input.files[0];
+    const chatBox = document.getElementById('chat-box');
+
+    // สลับไปหน้าแชทก่อน
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-chat').classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('active'));
+    document.querySelector('.nav-btn').classList.add('active');
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const base64 = e.target.result;
+        const base64Data = base64.split(',')[1];
+        const mimeType = file.type;
+
+        chatBox.innerHTML += `
+            <div class="bubble user">
+                💊 ส่งรูปยา<br>
+                <img src="${base64}" class="bubble-img" alt="รูปยา">
+            </div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+        setLoading(true);
+
+        const loading = document.createElement('div');
+        loading.className = "bubble ai";
+        loading.innerText = "น้องใจดีกำลังดูยาให้... 💊🔍";
+        chatBox.appendChild(loading);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        const userMsg = {
+            role: "user",
+            content: [
+                {
+                    type: "image_url",
+                    image_url: { url: `data:${mimeType};base64,${base64Data}` }
+                },
+                {
+                    type: "text",
+                    text: "นี่คือรูปยาที่ฉันมี ช่วยบอกสรรพคุณ วิธีใช้ และคำเตือนเบื้องต้นให้หน่อยนะคะ และเตือนถ้ายานั้นตรงกับรายการแพ้ยาของฉัน"
+                }
+            ]
+        };
+        conversationHistory.push(userMsg);
+
+        try {
+            const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${API_KEY}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: "deepseek/deepseek-chat",
+                    messages: [
+                        { role: "system", content: buildSystemPrompt() },
+                        ...conversationHistory
+                    ]
+                })
+            });
+            const data = await res.json();
+            const reply = data.choices[0].message.content;
+
+            conversationHistory.push({ role: "assistant", content: reply });
+            loading.innerHTML = reply + `<a href="https://pharmacy.mahidol.ac.th/" target="_blank" class="ai-source">🔗 อ้างอิง: คณะเภสัชฯ มหิดล</a>`;
+            saveHistory("[รูปยา]", reply);
+        } catch (e) {
+            loading.innerText = "ขออภัยค่ะ ไม่สามารถวิเคราะห์รูปยาได้ในขณะนี้";
+            conversationHistory.pop();
+        }
+
+        setLoading(false);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        input.value = "";
+    };
+    reader.readAsDataURL(file);
+}
+
+// ==================== ตู้ยา ====================
+function searchDrug(q) {
+    const container = document.getElementById('drug-list');
+    const filtered = DRUG_DB.filter(d =>
+        d.th.includes(q) || d.en.toLowerCase().includes(q.toLowerCase()) || d.tag.includes(q)
+    );
+    container.innerHTML = filtered.map(d => `
+        <div class="drug-card" onclick="viewDrug('${d.en}')">
+            <div class="drug-info"><h4>${d.th}</h4><span>${d.en}</span></div>
+            <div style="color: #ddd;">❯</div>
+        </div>
+    `).join('');
+}
+
+function viewDrug(en) {
+    const d = DRUG_DB.find(x => x.en === en);
+    const panel = document.getElementById('drug-detail');
+    panel.style.display = "block";
+    document.getElementById('drug-list').style.display = "none";
+    panel.innerHTML = `
+        <p onclick="closeDrugDetail()" style="color:#aaa; font-weight:bold; cursor:pointer; text-align:right;">✕ ปิด</p>
+        <h3 style="color:var(--primary);">${d.th} (${d.en})</h3>
+        <p><b>สรรพคุณ:</b> ${d.tag}</p>
+        <p><b>วิธีใช้:</b> ${d.dose}</p>
+        <p style="color:var(--danger);"><b>คำเตือน:</b> ${d.warn}</p>
+        <a href="${d.ref}" target="_blank" style="display:inline-block; margin-top:8px; font-size:12px; color:var(--primary);">🔗 แหล่งที่มา</a>
+    `;
+}
+
+function closeDrugDetail() {
+    document.getElementById('drug-detail').style.display = "none";
+    document.getElementById('drug-list').style.display = "block";
+}
+
+// ==================== Reset Chat ====================
+function resetChat() {
+    if (confirm("เริ่มบทสนทนาใหม่ใช่ไหมคะ?")) {
+        // clear conversation history ด้วย
+        conversationHistory = [];
+        document.getElementById('chat-box').innerHTML = `<div class="bubble ai" id="welcome-bubble"></div>`;
+        setWelcomeMessage();
+        document.getElementById('emergency-alert').style.display = "none";
+    }
+}
+
+// ==================== ประวัติ ====================
+function renderHistory() {
+    const h = JSON.parse(localStorage.getItem('healthHist_cute') || "[]");
+    document.getElementById('history-container').innerHTML = h.length ? h.map(x => `
+        <div style="background:var(--card-bg, white); padding:15px; border-radius:15px; margin-bottom:10px; box-shadow: var(--shadow);">
+            <div style="font-size:10px; color:#aaa;">🕒 ${x.t}</div>
+            <div style="font-weight:900; color:var(--primary);">ถาม: ${x.q}</div>
+            <div style="font-size:13px; margin-top:5px; white-space: pre-wrap;">${x.a}</div>
+        </div>
+    `).join('') : "<p style='text-align:center; color:#ccc;'>ยังไม่มีประวัติ</p>";
+}
+
+function saveHistory(q, a) {
+    let h = JSON.parse(localStorage.getItem('healthHist_cute') || "[]");
+    h.unshift({ q, a, t: new Date().toLocaleString('th-TH') });
+    localStorage.setItem('healthHist_cute', JSON.stringify(h.slice(0, 10)));
+}
+
+function clearHistory() {
+    if (confirm("ลบประวัติทั้งหมด?")) {
+        localStorage.removeItem('healthHist_cute');
+        renderHistory();
+    }
+}
+
+// ==================== Theme ====================
+function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('theme-btn').innerText = isDark ? '☀️' : '🌙';
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+}
+
+(function () {
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark');
+        document.getElementById('theme-btn').innerText = '☀️';
+    }
+})();
+</script>
+</body>
+</html>
