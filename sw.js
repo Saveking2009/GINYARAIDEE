@@ -1,3 +1,18 @@
+const CACHE_NAME = 'nong-jaidee-v1';
+const ASSETS = [
+  'index.html',
+  'style.css',
+  'icon.png'
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+  );
+});
+
 self.addEventListener('fetch', (event) => {
-    // ปล่อยว่างไว้เพื่อให้แอปผ่านเงื่อนไขการตรวจสอบของ Chrome
+  event.respondWith(
+    caches.match(event.request).then((response) => response || fetch(event.request))
+  );
 });
