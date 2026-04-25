@@ -2,7 +2,7 @@ const CACHE_NAME = 'nong-jaidee-v1';
 const ASSETS = [
   'index.html',
   'style.css',
-  'icon.png'
+  'ChatGPT Image 24 เม.ย. 2569 21_18_08.png'
 ];
 
 self.addEventListener('install', (event) => {
