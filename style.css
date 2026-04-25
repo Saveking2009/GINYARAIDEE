@@ -447,6 +447,14 @@ body.dark .bubble.ai .time-text {
     color: #94a3b8 !important; /* สีเทาอ่อนเพื่อให้ไม่กวนสายตา */
 }
 
+body.dark #screen-history h2 {
+    color: #ffffff !important;
+}
+
+body.dark #history-container p {
+    color: #94a3b8 !important;
+}
+
 /* ปรับปรุงปุ่ม "ล้างประวัติทั้งหมด" ให้ดูสะอาดตาขึ้น */
 body.dark #history-container > div {
     background: #1e293b !important;
