@@ -652,12 +652,12 @@ function resetChat() {
 function renderHistory() {
     const h = JSON.parse(localStorage.getItem('healthHist_cute') || "[]");
     document.getElementById('history-container').innerHTML = h.length ? h.map(x => `
-        <div style="background:var(--card-bg, white); padding:15px; border-radius:15px; margin-bottom:10px; box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,0.05);">
+        <div style="background:var(--card-bg, white); padding:15px; border-radius:15px; margin-bottom:10px; box-shadow: var(--shadow);">
             <div style="font-size:10px; color:var(--text-muted);">🕒 ${x.t}</div>
-            <div style="font-weight:900; color:var(--primary); font-size:13px; margin-top:4px;">ถาม: ${x.q}</div>
-            <div style="font-size:13px; margin-top:8px; white-space: pre-wrap; color:var(--text-main); line-height:1.6;">${x.a}</div>
+            <div style="font-weight:900; color:var(--primary); font-size:13px;">ถาม: ${x.q}</div>
+            <div style="font-size:13px; margin-top:5px; white-space: pre-wrap; color:var(--text-main);">${x.a}</div>
         </div>
-    `).join('') : "<p style='text-align:center; color:var(--text-muted);'>ยังไม่มีประวัติ</p>";
+    `).join('') : "<p style='text-align:center; color:#ccc;'>ยังไม่มีประวัติ</p>";
 }
 
 function saveHistory(q, a) {
