@@ -653,21 +653,34 @@ async function sendChat() {
                 model: "openai/gpt-oss-120b:free",
                 messages: [
                     { role: "system", content: buildSystemPrompt() },
-                    ...conversationHistory   // ส่ง history ทั้งหมด
+                    ...conversationHistory
                 ]
             })
         });
         const data = await res.json();
+
+        // ตรวจสอบ error จาก API
+        if (data.error) {
+            console.error('API Error:', data.error);
+            throw new Error(data.error.message || JSON.stringify(data.error));
+        }
+        if (!data.choices || !data.choices[0]) {
+            console.error('Unexpected response:', data);
+            throw new Error('API ตอบกลับผิดรูปแบบ');
+        }
         const reply = data.choices[0].message.content;
 
-        // เพิ่ม reply เข้า history ด้วย
         conversationHistory.push({ role: "assistant", content: reply });
-
         loading.innerHTML = reply + `<a href="https://ddc.moph.go.th/" target="_blank" class="ai-source">🔗 อ้างอิงเบื้องต้น: กรมควบคุมโรค</a>`;
         saveHistory(text, reply);
     } catch (e) {
-        loading.innerText = "ขออภัยค่ะ ระบบขัดข้องเล็กน้อย ลองปรึกษาสายด่วน 1669 นะคะ";
-        // ลบ message ล่าสุดออกจาก history เพราะ error
+        console.error('Chat error:', e);
+        let errMsg = "ขออภัยค่ะ ระบบขัดข้อง";
+        if (e.message && e.message.includes('rate')) errMsg = "⏰ ใช้เกินจำนวนครั้งที่ฟรี ลองอีกครั้งใน 1 นาทีนะคะ";
+        else if (e.message && (e.message.includes('credit') || e.message.includes('401'))) errMsg = "🔑 API Key หมดเครดิตหรือใช้ไม่ได้";
+        else if (e.message && e.message.includes('404')) errMsg = "🤖 ไม่พบโมเดลนี้แล้ว";
+        else if (e.message) errMsg = "ขออภัยค่ะ: " + e.message;
+        loading.innerText = errMsg + "\n(ฉุกเฉินโทร 1669)";
         conversationHistory.pop();
     }
 
@@ -729,7 +742,7 @@ async function analyzeSymptomImage(input) {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    model: "deepseek/deepseek-chat",
+                    model: "google/gemini-2.0-flash-exp:free",
                     messages: [
                         { role: "system", content: buildSystemPrompt() },
                         ...conversationHistory
@@ -737,13 +750,16 @@ async function analyzeSymptomImage(input) {
                 })
             });
             const data = await res.json();
+            if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+            if (!data.choices || !data.choices[0]) throw new Error('API ตอบกลับผิดรูปแบบ');
             const reply = data.choices[0].message.content;
 
             conversationHistory.push({ role: "assistant", content: reply });
             loading.innerHTML = reply + `<a href="https://ddc.moph.go.th/" target="_blank" class="ai-source">🔗 อ้างอิงเบื้องต้น: กรมควบคุมโรค</a>`;
             saveHistory("[รูปอาการ]", reply);
         } catch (e) {
-            loading.innerText = "ขออภัยค่ะ ไม่สามารถวิเคราะห์รูปได้ในขณะนี้";
+            console.error('Image analysis error:', e);
+            loading.innerText = "ขออภัยค่ะ ไม่สามารถวิเคราะห์รูปได้: " + (e.message || 'unknown');
             conversationHistory.pop();
         }
 
@@ -810,7 +826,7 @@ async function analyzeDrugImage(input) {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    model: "deepseek/deepseek-chat",
+                    model: "google/gemini-2.0-flash-exp:free",
                     messages: [
                         { role: "system", content: buildSystemPrompt() },
                         ...conversationHistory
@@ -818,13 +834,16 @@ async function analyzeDrugImage(input) {
                 })
             });
             const data = await res.json();
+            if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+            if (!data.choices || !data.choices[0]) throw new Error('API ตอบกลับผิดรูปแบบ');
             const reply = data.choices[0].message.content;
 
             conversationHistory.push({ role: "assistant", content: reply });
             loading.innerHTML = reply + `<a href="https://pharmacy.mahidol.ac.th/" target="_blank" class="ai-source">🔗 อ้างอิง: คณะเภสัชฯ มหิดล</a>`;
             saveHistory("[รูปยา]", reply);
         } catch (e) {
-            loading.innerText = "ขออภัยค่ะ ไม่สามารถวิเคราะห์รูปยาได้ในขณะนี้";
+            console.error('Drug image error:', e);
+            loading.innerText = "ขออภัยค่ะ ไม่สามารถวิเคราะห์รูปยาได้: " + (e.message || 'unknown');
             conversationHistory.pop();
         }
 
@@ -1367,7 +1386,7 @@ async function analyzeFoodImage(input) {
                 method: "POST",
                 headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    model: "deepseek/deepseek-chat",
+                    model: "google/gemini-2.0-flash-exp:free",
                     messages: [{
                         role: "user",
                         content: [
