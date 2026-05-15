@@ -492,3 +492,142 @@ body.dark .reset-btn-link:hover {
 body.dark #history-screen {
     background: #0f172a; 
 }
+/* ==================== รายงานประจำสัปดาห์ ==================== */
+.weekly-card {
+    background: white;
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: var(--shadow);
+    animation: fadeSlideUp 0.4s ease both;
+    margin-bottom: 14px;
+}
+.weekly-section-title {
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--primary);
+    margin-bottom: 14px;
+}
+.log-row { margin-bottom: 14px; }
+.log-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: #555;
+    display: block;
+    margin-bottom: 6px;
+}
+.mood-row { display: flex; gap: 8px; }
+.mood-btn {
+    flex: 1;
+    font-size: 22px;
+    background: #f7f9fc;
+    border: 2px solid #eee;
+    border-radius: 12px;
+    padding: 6px 0;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.mood-btn:hover { border-color: var(--primary); transform: scale(1.1); }
+.mood-btn.selected { border-color: var(--primary); background: var(--soft-orange); transform: scale(1.12); }
+
+.slider-row { display: flex; align-items: center; gap: 10px; }
+.slider-row input[type=range] {
+    flex: 1;
+    accent-color: var(--primary);
+    height: 6px;
+    cursor: pointer;
+}
+.slider-val {
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--primary);
+    min-width: 50px;
+    text-align: right;
+}
+
+.exercise-row { display: flex; flex-wrap: wrap; gap: 7px; }
+.ex-btn {
+    padding: 7px 12px;
+    border: 1.5px solid #eee;
+    border-radius: 20px;
+    background: #f7f9fc;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.ex-btn:hover { border-color: var(--primary); color: var(--primary); }
+.ex-btn.selected { background: var(--soft-orange); border-color: var(--primary); color: var(--primary); }
+
+.save-log-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 4px;
+}
+.save-log-btn:hover { background: #e56b10; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,122,24,0.3); }
+
+.summary-stat {
+    background: #fafafa;
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.stat-icon { font-size: 20px; }
+.stat-label { font-size: 11px; color: #888; font-weight: 600; }
+.stat-val { font-size: 18px; font-weight: 900; }
+
+.ai-analyze-btn {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, #6c63ff, #a78bfa);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 12px;
+}
+.ai-analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(108,99,255,0.35); }
+.ai-analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.ai-weekly-bubble {
+    background: #f5f3ff;
+    border: 1.5px solid #c4b5fd;
+    border-radius: 18px;
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #3730a3;
+    white-space: pre-wrap;
+}
+
+/* Dark mode สำหรับรายงานสัปดาห์ */
+body.dark .weekly-card { background: #1a3a5c; }
+body.dark .weekly-section-title { color: #7ab8e8; }
+body.dark .log-label { color: #94a3b8; }
+body.dark .mood-btn { background: #112233; border-color: #2a4a6a; }
+body.dark .mood-btn.selected { background: #2a6496; border-color: #7ab8e8; }
+body.dark .ex-btn { background: #112233; border-color: #2a4a6a; color: #cfe8ff; }
+body.dark .ex-btn.selected { background: #2a6496; border-color: #7ab8e8; color: white; }
+body.dark .summary-stat { background: #112233; }
+body.dark .stat-label { color: #5a8ab0; }
+body.dark .ai-weekly-bubble { background: #1e1b4b; border-color: #4338ca; color: #a5b4fc; }
+body.dark textarea {
+    background: #1a3a5c !important;
+    color: #cfe8ff !important;
+    border-color: #2a6496 !important;
+}
+body.dark textarea::placeholder { color: #5a8ab0; }
