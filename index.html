@@ -114,10 +114,14 @@
             </div>
 
             <div class="input-area">
-                <!-- ปุ่มกล้อง/รูป (ใช้ได้ทั้งมือถือและคอม) -->
-                <button id="cam-btn" onclick="document.getElementById('chat-cam-input').click()"
-                    style="background:none; border:none; font-size:22px; cursor:pointer; padding:0 5px;">📷</button>
-                <input type="file" id="chat-cam-input" accept="image/*" style="display:none" onchange="analyzeSymptomImage(this)">
+                <!-- ปุ่มกล้อง: ถ่ายรูปใหม่ -->
+                <button id="cam-btn" onclick="document.getElementById('chat-cam-input').click()" title="ถ่ายรูป"
+                    style="background:none; border:none; font-size:22px; cursor:pointer; padding:0 3px;">📷</button>
+                <!-- ปุ่มแกลเลอรี่ -->
+                <button id="gallery-btn" onclick="document.getElementById('chat-gallery-input').click()" title="เลือกจากแกลเลอรี่"
+                    style="background:none; border:none; font-size:20px; cursor:pointer; padding:0 3px;">🖼️</button>
+                <input type="file" id="chat-cam-input" accept="image/*" capture="environment" style="display:none" onchange="analyzeSymptomImage(this)">
+                <input type="file" id="chat-gallery-input" accept="image/*" style="display:none" onchange="analyzeSymptomImage(this)">
 
                 <input type="text" id="chat-input" placeholder="พิมพ์ถามที่นี่..."
                     onkeydown="if(event.key==='Enter' && !isSending)sendChat()">
@@ -128,13 +132,17 @@
         <div id="screen-drug" class="screen">
             <h2 style="font-weight:900; margin-bottom:5px; color: var(--primary);">ตู้ยาสามัญ</h2>
             <p style="font-size: 11px; color: #888; margin-bottom: 15px;">อ้างอิง: คณะเภสัชศาสตร์ มหาวิทยาลัยมหิดล</p>
-            <div style="text-align:right; margin-bottom:10px;">
+            <div style="display:flex; gap:8px; margin-bottom:10px;">
                 <button onclick="document.getElementById('drug-cam-input').click()"
-                    style="background:var(--primary); color:white; border:none; padding:8px 16px; border-radius:20px; font-size:13px; font-weight:800; cursor:pointer;">
-                    📷 ถ่ายรูปยา / เลือกรูปยา
+                    style="flex:1; background:var(--primary); color:white; border:none; padding:10px; border-radius:20px; font-size:13px; font-weight:800; cursor:pointer;">
+                    📷 ถ่ายรูปยา
                 </button>
-                <!-- ลบ capture="environment" ออก → ทำงานได้ทั้งคอมและมือถือ -->
-                <input type="file" id="drug-cam-input" accept="image/*" style="display:none" onchange="analyzeDrugImage(this)">
+                <button onclick="document.getElementById('drug-gallery-input').click()"
+                    style="flex:1; background:white; color:var(--primary); border:2px solid var(--primary); padding:8px; border-radius:20px; font-size:13px; font-weight:800; cursor:pointer;">
+                    🖼️ เลือกรูป
+                </button>
+                <input type="file" id="drug-cam-input" accept="image/*" capture="environment" style="display:none" onchange="analyzeDrugImage(this)">
+                <input type="file" id="drug-gallery-input" accept="image/*" style="display:none" onchange="analyzeDrugImage(this)">
             </div>
             <input type="text" id="drug-search" placeholder="🔍 ค้นหายา หรือ อาการ..." oninput="searchDrug(this.value)"
                 style="width:100%; padding:15px; border-radius:var(--radius-md); border:none; margin-bottom:20px; box-shadow: var(--shadow); outline:none;">
@@ -200,11 +208,17 @@
                 </div>
             </div>
 
-            <!-- Add food button -->
-            <button class="food-add-btn" onclick="document.getElementById('food-cam-input').click()">
-                📷 ถ่ายรูป / เลือกรูปอาหาร
-            </button>
-            <input type="file" id="food-cam-input" accept="image/*" style="display:none" onchange="analyzeFoodImage(this)">
+            <!-- Add food buttons -->
+            <div class="food-add-row">
+                <button class="food-add-btn camera" onclick="document.getElementById('food-cam-input').click()">
+                    📷 ถ่ายรูปอาหาร
+                </button>
+                <button class="food-add-btn gallery" onclick="document.getElementById('food-gallery-input').click()">
+                    🖼️ จากแกลเลอรี่
+                </button>
+            </div>
+            <input type="file" id="food-cam-input" accept="image/*" capture="environment" style="display:none" onchange="analyzeFoodImage(this)">
+            <input type="file" id="food-gallery-input" accept="image/*" style="display:none" onchange="analyzeFoodImage(this)">
 
             <!-- Meal sections -->
             <div class="meal-section">
