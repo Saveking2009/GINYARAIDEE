@@ -477,7 +477,7 @@ const DRUG_DB = [
 ];
 
 const DANGER_WORDS = ["แน่นหน้าอก","หายใจไม่ออก","ชัก","ปากเบี้ยว","แขนขาอ่อนแรง","เลือดไม่หยุด","สลบ"];
-const API_KEY = "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";
+const API_KEY = "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";
 
 let selectedGender = "";
 let isSending = false;
@@ -650,7 +650,7 @@ async function sendChat() {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                model: "openrouter/free",
+                model: "deepseek/deepseek-v4-flash:free",
                 messages: [
                     { role: "system", content: buildSystemPrompt() },
                     ...conversationHistory
@@ -1165,7 +1165,7 @@ ${summary}
             method: "POST",
             headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
             body: JSON.stringify({
-                model: "openrouter/free",
+                model: "deepseek/deepseek-v4-flash:free",
                 messages: [{ role: "user", content: prompt }]
             })
         });
