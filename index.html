@@ -477,7 +477,7 @@ const DRUG_DB = [
 ];
 
 const DANGER_WORDS = ["แน่นหน้าอก","หายใจไม่ออก","ชัก","ปากเบี้ยว","แขนขาอ่อนแรง","เลือดไม่หยุด","สลบ"];
-const API_KEY = "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";
+const API_KEY = "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";
 
 let selectedGender = "";
 let isSending = false;
@@ -650,7 +650,7 @@ async function sendChat() {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                model: "openai/gpt-oss-120b:free",
+                model: "openrouter/free",
                 messages: [
                     { role: "system", content: buildSystemPrompt() },
                     ...conversationHistory
@@ -742,7 +742,7 @@ async function analyzeSymptomImage(input) {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    model: "google/gemini-2.0-flash-exp:free",
+                    model: "qwen/qwen2.5-vl-72b-instruct:free",
                     messages: [
                         { role: "system", content: buildSystemPrompt() },
                         ...conversationHistory
@@ -826,7 +826,7 @@ async function analyzeDrugImage(input) {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    model: "google/gemini-2.0-flash-exp:free",
+                    model: "qwen/qwen2.5-vl-72b-instruct:free",
                     messages: [
                         { role: "system", content: buildSystemPrompt() },
                         ...conversationHistory
@@ -1165,7 +1165,7 @@ ${summary}
             method: "POST",
             headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
             body: JSON.stringify({
-                model: "openai/gpt-oss-120b:free",
+                model: "openrouter/free",
                 messages: [{ role: "user", content: prompt }]
             })
         });
@@ -1386,7 +1386,7 @@ async function analyzeFoodImage(input) {
                 method: "POST",
                 headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    model: "google/gemini-2.0-flash-exp:free",
+                    model: "qwen/qwen2.5-vl-72b-instruct:free",
                     messages: [{
                         role: "user",
                         content: [

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nong-jaidee-v5';
+const CACHE_NAME = 'nong-jaidee-v7';
 const ASSETS = [
   'index.html',
   'style.css',
