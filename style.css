@@ -631,3 +631,249 @@ body.dark textarea {
     border-color: #2a6496 !important;
 }
 body.dark textarea::placeholder { color: #5a8ab0; }
+
+/* ==================== ฟีเจอร์อาหาร ==================== */
+.food-summary-card {
+    background: linear-gradient(135deg, #ff7a18 0%, #ff9f43 100%);
+    border-radius: 22px;
+    padding: 18px;
+    color: white;
+    box-shadow: 0 10px 30px rgba(255,122,24,0.3);
+    margin-bottom: 14px;
+    animation: fadeSlideUp 0.4s ease both;
+}
+.food-summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 12px;
+}
+.food-progress-bar {
+    height: 8px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 10px;
+    overflow: hidden;
+}
+.food-progress-fill {
+    height: 100%;
+    background: rgba(255,255,255,0.95);
+    border-radius: 10px;
+    transition: width 0.6s ease;
+}
+.macro-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 14px;
+}
+.macro-item {
+    background: rgba(255,255,255,0.18);
+    border-radius: 12px;
+    padding: 8px;
+    text-align: center;
+}
+.macro-label {
+    font-size: 10px;
+    opacity: 0.9;
+    font-weight: 600;
+}
+.macro-val {
+    font-size: 14px;
+    font-weight: 900;
+    margin-top: 2px;
+}
+
+.food-add-btn {
+    width: 100%;
+    padding: 14px;
+    background: white;
+    color: var(--primary);
+    border: 2px dashed var(--primary);
+    border-radius: 16px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-bottom: 16px;
+}
+.food-add-btn:hover {
+    background: var(--soft-orange);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255,122,24,0.2);
+}
+
+.meal-section {
+    background: white;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow);
+}
+.meal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.meal-title {
+    font-weight: 900;
+    font-size: 14px;
+    color: #333;
+}
+.meal-cal {
+    font-size: 12px;
+    color: var(--primary);
+    font-weight: 800;
+    background: var(--soft-orange);
+    padding: 3px 10px;
+    border-radius: 12px;
+}
+.meal-empty {
+    font-size: 12px;
+    color: #ccc;
+    text-align: center;
+    padding: 8px;
+    font-style: italic;
+}
+.meal-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background: #fafafa;
+    border-radius: 10px;
+    margin-bottom: 6px;
+    gap: 8px;
+}
+.meal-item-name {
+    font-weight: 800;
+    font-size: 13px;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.meal-item-detail {
+    font-size: 10px;
+    color: #888;
+    margin-top: 2px;
+}
+.meal-del-btn {
+    background: #fef2f2;
+    color: var(--danger);
+    border: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: 900;
+    flex-shrink: 0;
+    transition: 0.2s;
+}
+.meal-del-btn:hover { background: var(--danger); color: white; transform: scale(1.1); }
+
+.health-warning-box {
+    background: #fef3c7;
+    border: 1.5px solid #f59e0b;
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: #92400e;
+    font-weight: 700;
+    margin-top: 10px;
+    line-height: 1.7;
+}
+.health-ok-box {
+    background: #d1fae5;
+    border: 1.5px solid #10b981;
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: #065f46;
+    font-weight: 700;
+    margin-top: 10px;
+    text-align: center;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 9998;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    animation: fadeIn 0.2s ease;
+}
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 18px;
+    max-width: 380px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.food-analyze-result {
+    background: #fff7ed;
+    border: 1.5px solid #ffd6a8;
+    border-radius: 14px;
+    padding: 12px;
+}
+.nutri-row {
+    background: white;
+    padding: 6px 10px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+}
+.nutri-row b { color: var(--primary); }
+
+.meal-pick-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+.meal-pick-btn {
+    padding: 12px;
+    background: var(--soft-orange);
+    color: var(--primary);
+    border: 1.5px solid #ffd6a8;
+    border-radius: 14px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.meal-pick-btn:hover:not(:disabled) {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+}
+.meal-pick-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Dark mode สำหรับอาหาร */
+body.dark .meal-section { background: #1a3a5c; }
+body.dark .meal-title { color: #cfe8ff; }
+body.dark .meal-cal { background: #2a6496; color: #cfe8ff; }
+body.dark .meal-item { background: #112233; }
+body.dark .meal-item-name { color: #cfe8ff; }
+body.dark .meal-item-detail { color: #5a8ab0; }
+body.dark .food-add-btn { background: #1a3a5c; border-color: #7ab8e8; color: #7ab8e8; }
+body.dark .food-add-btn:hover { background: #2a6496; }
+body.dark .modal-content { background: #1a3a5c; color: #cfe8ff; }
+body.dark .food-analyze-result { background: #112233; border-color: #2a6496; }
+body.dark .nutri-row { background: #1a3a5c; color: #cfe8ff; }
+body.dark .nutri-row b { color: #ff9f43; }
+body.dark .meal-pick-btn { background: #112233; color: #7ab8e8; border-color: #2a6496; }
+body.dark .meal-pick-btn:hover:not(:disabled) { background: #2a6496; color: white; }
+body.dark .health-warning-box { background: #422006; border-color: #f59e0b; color: #fde68a; }
+body.dark .health-ok-box { background: #064e3b; border-color: #10b981; color: #6ee7b7; }

@@ -86,6 +86,7 @@
         <nav class="nav">
             <button class="nav-btn active" onclick="showScreen('chat', this)">ถามอาการ</button>
             <button class="nav-btn" onclick="showScreen('drug', this)">ตู้ยา</button>
+            <button class="nav-btn" onclick="showScreen('food', this)">🍱 อาหาร</button>
             <button class="nav-btn" onclick="showScreen('history', this)">ประวัติ</button>
             <button class="nav-btn" onclick="showScreen('weekly', this)">📊 รายสัปดาห์</button>
             <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">🌙</button>
@@ -146,6 +147,123 @@
             <div id="history-container"></div>
             <p onclick="clearHistory()" style="text-align:center; color:#ccc; font-size:12px; margin-top:20px; cursor:pointer;">ล้างประวัติทั้งหมด 🧹</p>
         </div>
+        <!-- ==================== หน้าอาหาร ==================== -->
+        <div id="screen-food" class="screen">
+            <h2 style="font-weight:900; margin-bottom:4px; color:var(--primary);">🍱 บันทึกอาหาร</h2>
+            <p style="font-size:11px; color:#888; margin-bottom:14px;">ถ่ายรูปอาหาร AI จะคำนวณสารอาหารให้</p>
+
+            <!-- Daily Summary Card -->
+            <div class="food-summary-card">
+                <div class="food-summary-header">
+                    <div>
+                        <div style="font-size:11px; color:rgba(255,255,255,0.85); font-weight:600;">วันนี้ <span id="food-today-date"></span></div>
+                        <div style="font-size:28px; font-weight:900; line-height:1.2;"><span id="food-cal-today">0</span> <span style="font-size:14px;">kcal</span></div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:11px; color:rgba(255,255,255,0.85); font-weight:600;">เป้าหมาย</div>
+                        <div style="font-size:18px; font-weight:900;"><span id="food-cal-goal">2000</span> kcal</div>
+                    </div>
+                </div>
+                <div class="food-progress-bar">
+                    <div class="food-progress-fill" id="food-progress-fill" style="width:0%;"></div>
+                </div>
+                <div style="font-size:11px; color:rgba(255,255,255,0.9); margin-top:6px;" id="food-progress-text">เริ่มต้นวันใหม่กันเถอะ! 🌱</div>
+
+                <!-- Macros -->
+                <div class="macro-row">
+                    <div class="macro-item">
+                        <div class="macro-label">โปรตีน</div>
+                        <div class="macro-val"><span id="m-protein">0</span> g</div>
+                    </div>
+                    <div class="macro-item">
+                        <div class="macro-label">คาร์บ</div>
+                        <div class="macro-val"><span id="m-carb">0</span> g</div>
+                    </div>
+                    <div class="macro-item">
+                        <div class="macro-label">ไขมัน</div>
+                        <div class="macro-val"><span id="m-fat">0</span> g</div>
+                    </div>
+                </div>
+                <div class="macro-row" style="margin-top:6px;">
+                    <div class="macro-item">
+                        <div class="macro-label">น้ำตาล</div>
+                        <div class="macro-val"><span id="m-sugar">0</span> g</div>
+                    </div>
+                    <div class="macro-item">
+                        <div class="macro-label">โซเดียม</div>
+                        <div class="macro-val"><span id="m-sodium">0</span> mg</div>
+                    </div>
+                    <div class="macro-item">
+                        <div class="macro-label">ใยอาหาร</div>
+                        <div class="macro-val"><span id="m-fiber">0</span> g</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add food button -->
+            <button class="food-add-btn" onclick="document.getElementById('food-cam-input').click()">
+                📷 ถ่ายรูป / เลือกรูปอาหาร
+            </button>
+            <input type="file" id="food-cam-input" accept="image/*" style="display:none" onchange="analyzeFoodImage(this)">
+
+            <!-- Meal sections -->
+            <div class="meal-section">
+                <div class="meal-header">
+                    <span class="meal-title">🌅 อาหารเช้า</span>
+                    <span class="meal-cal" id="meal-cal-breakfast">0 kcal</span>
+                </div>
+                <div class="meal-items" id="meal-items-breakfast">
+                    <p class="meal-empty">ยังไม่มีรายการ</p>
+                </div>
+            </div>
+            <div class="meal-section">
+                <div class="meal-header">
+                    <span class="meal-title">☀️ อาหารกลางวัน</span>
+                    <span class="meal-cal" id="meal-cal-lunch">0 kcal</span>
+                </div>
+                <div class="meal-items" id="meal-items-lunch">
+                    <p class="meal-empty">ยังไม่มีรายการ</p>
+                </div>
+            </div>
+            <div class="meal-section">
+                <div class="meal-header">
+                    <span class="meal-title">🌙 อาหารเย็น</span>
+                    <span class="meal-cal" id="meal-cal-dinner">0 kcal</span>
+                </div>
+                <div class="meal-items" id="meal-items-dinner">
+                    <p class="meal-empty">ยังไม่มีรายการ</p>
+                </div>
+            </div>
+            <div class="meal-section">
+                <div class="meal-header">
+                    <span class="meal-title">🍪 ของว่าง</span>
+                    <span class="meal-cal" id="meal-cal-snack">0 kcal</span>
+                </div>
+                <div class="meal-items" id="meal-items-snack">
+                    <p class="meal-empty">ยังไม่มีรายการ</p>
+                </div>
+            </div>
+
+            <!-- AI suggestion -->
+            <div id="food-ai-suggestion" style="display:none;"></div>
+        </div>
+
+        <!-- Meal picker modal -->
+        <div id="meal-picker-modal" class="modal-overlay" style="display:none;">
+            <div class="modal-content">
+                <div style="font-weight:900; font-size:16px; margin-bottom:6px; color:var(--primary);">วิเคราะห์อาหารแล้ว ✨</div>
+                <div id="meal-preview" style="margin-bottom:14px;"></div>
+                <div style="font-size:12px; color:#666; margin-bottom:8px; font-weight:700;">บันทึกเป็นมื้อไหน?</div>
+                <div class="meal-pick-row">
+                    <button class="meal-pick-btn" onclick="confirmAddMeal('breakfast')">🌅 เช้า</button>
+                    <button class="meal-pick-btn" onclick="confirmAddMeal('lunch')">☀️ กลางวัน</button>
+                    <button class="meal-pick-btn" onclick="confirmAddMeal('dinner')">🌙 เย็น</button>
+                    <button class="meal-pick-btn" onclick="confirmAddMeal('snack')">🍪 ว่าง</button>
+                </div>
+                <button onclick="cancelMealPicker()" style="width:100%; margin-top:10px; padding:10px; background:#f1f5f9; color:#666; border:none; border-radius:14px; font-family:inherit; font-weight:700; cursor:pointer;">ยกเลิก</button>
+            </div>
+        </div>
+
         <!-- ==================== หน้ารายงานประจำสัปดาห์ ==================== -->
         <div id="screen-weekly" class="screen">
             <h2 style="font-weight:900; margin-bottom:4px; color:var(--primary);">📊 รายงานประจำสัปดาห์</h2>
@@ -224,6 +342,13 @@
                     🤖 ให้น้องใจดีวิเคราะห์สุขภาพสัปดาห์นี้
                 </button>
                 <div id="ai-weekly-result" style="margin-top:12px; display:none;"></div>
+            </div>
+
+            <!-- กราฟแคลอรี่ 7 วัน -->
+            <div class="weekly-card" style="margin-top:14px;">
+                <div class="weekly-section-title">🍱 แคลอรี่ 7 วันที่ผ่านมา</div>
+                <canvas id="calorie-chart" height="180"></canvas>
+                <div id="calorie-summary" style="margin-top:12px;"></div>
             </div>
 
             <p onclick="clearWeeklyData()" style="text-align:center; color:#ccc; font-size:12px; margin-top:20px; cursor:pointer;">ล้างข้อมูลรายสัปดาห์ทั้งหมด 🧹</p>
@@ -437,11 +562,13 @@ function showScreen(id, btn) {
     document.getElementById('screen-' + id).classList.add('active');
     btn.classList.add('active');
     if (id === 'history') renderHistory();
+    if (id === 'food') showFoodScreen();
     if (id === 'weekly') {
         loadChartJS(() => {
             checkTodayLog();
             renderWeeklyChart();
             renderWeeklySummary();
+            renderCalorieChart();
         });
     }
 }
@@ -1034,6 +1161,366 @@ function loadChartJS(cb) {
     s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
     s.onload = cb;
     document.head.appendChild(s);
+}
+
+// ==================== ฟีเจอร์อาหาร ====================
+let pendingFoodData = null;
+let calorieChart = null;
+
+function getFoodKey(date) {
+    return 'food_' + (date || new Date().toISOString().slice(0, 10));
+}
+
+function getTodayFood() {
+    const raw = localStorage.getItem(getFoodKey());
+    return raw ? JSON.parse(raw) : { breakfast: [], lunch: [], dinner: [], snack: [] };
+}
+
+function saveTodayFood(data) {
+    localStorage.setItem(getFoodKey(), JSON.stringify(data));
+}
+
+// คำนวณ BMR เป้าหมายแคลอรี่ (Mifflin-St Jeor)
+function calculateCalorieGoal() {
+    const age = parseFloat(localStorage.getItem('userAge')) || 25;
+    const weight = parseFloat(localStorage.getItem('userWeight')) || 60;
+    const height = parseFloat(localStorage.getItem('userHeight')) || 165;
+    const gender = localStorage.getItem('userGender') || 'หญิง';
+    let bmr;
+    if (gender === 'ชาย') {
+        bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+    } else {
+        bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161;
+    }
+    // TDEE สำหรับคนใช้ชีวิตปกติ (activity 1.4)
+    return Math.round(bmr * 1.4);
+}
+
+function showFoodScreen() {
+    // วันที่
+    const today = new Date();
+    const days = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+    document.getElementById('food-today-date').innerText = `(${days[today.getDay()]} ${today.getDate()}/${today.getMonth()+1})`;
+    document.getElementById('food-cal-goal').innerText = calculateCalorieGoal();
+    renderTodayFood();
+}
+
+function renderTodayFood() {
+    const data = getTodayFood();
+    const meals = ['breakfast','lunch','dinner','snack'];
+    let totalCal = 0, totalProtein = 0, totalCarb = 0, totalFat = 0;
+    let totalSugar = 0, totalSodium = 0, totalFiber = 0;
+
+    meals.forEach(meal => {
+        const container = document.getElementById('meal-items-' + meal);
+        const mealCalEl = document.getElementById('meal-cal-' + meal);
+        let mealCal = 0;
+
+        if (data[meal].length === 0) {
+            container.innerHTML = '<p class="meal-empty">ยังไม่มีรายการ</p>';
+        } else {
+            container.innerHTML = data[meal].map((item, idx) => {
+                mealCal += item.calories || 0;
+                return `
+                    <div class="meal-item">
+                        <div style="flex:1; min-width:0;">
+                            <div class="meal-item-name">${item.name}</div>
+                            <div class="meal-item-detail">${item.calories || 0} kcal · P:${item.protein||0}g C:${item.carb||0}g F:${item.fat||0}g</div>
+                        </div>
+                        <button class="meal-del-btn" onclick="deleteMealItem('${meal}',${idx})">✕</button>
+                    </div>
+                `;
+            }).join('');
+        }
+        mealCalEl.innerText = mealCal + ' kcal';
+        totalCal += mealCal;
+
+        data[meal].forEach(it => {
+            totalProtein += it.protein || 0;
+            totalCarb += it.carb || 0;
+            totalFat += it.fat || 0;
+            totalSugar += it.sugar || 0;
+            totalSodium += it.sodium || 0;
+            totalFiber += it.fiber || 0;
+        });
+    });
+
+    document.getElementById('food-cal-today').innerText = totalCal;
+    document.getElementById('m-protein').innerText = totalProtein.toFixed(0);
+    document.getElementById('m-carb').innerText = totalCarb.toFixed(0);
+    document.getElementById('m-fat').innerText = totalFat.toFixed(0);
+    document.getElementById('m-sugar').innerText = totalSugar.toFixed(0);
+    document.getElementById('m-sodium').innerText = totalSodium.toFixed(0);
+    document.getElementById('m-fiber').innerText = totalFiber.toFixed(0);
+
+    // Progress bar
+    const goal = calculateCalorieGoal();
+    const pct = Math.min(100, (totalCal / goal) * 100);
+    const fill = document.getElementById('food-progress-fill');
+    fill.style.width = pct + '%';
+    const txt = document.getElementById('food-progress-text');
+    const remaining = goal - totalCal;
+
+    if (totalCal === 0) {
+        txt.innerText = 'เริ่มต้นวันใหม่กันเถอะ! 🌱';
+        fill.style.background = 'rgba(255,255,255,0.9)';
+    } else if (remaining > 0) {
+        txt.innerText = `เหลืออีก ${remaining} kcal วันนี้ 💪`;
+        fill.style.background = 'rgba(255,255,255,0.95)';
+    } else if (remaining > -100) {
+        txt.innerText = `ครบเป้าหมายพอดี! 🎯`;
+        fill.style.background = '#fef9c3';
+    } else {
+        txt.innerText = `เกินเป้า ${Math.abs(remaining)} kcal ⚠️`;
+        fill.style.background = '#fecaca';
+    }
+
+    // เตือนสารอาหาร
+    showHealthWarnings(totalSugar, totalSodium, totalCal, goal);
+}
+
+function showHealthWarnings(sugar, sodium, cal, goal) {
+    const chronic = (localStorage.getItem('userChronic') || '').toLowerCase();
+    const warnings = [];
+
+    if (sugar > 50) warnings.push(`⚠️ น้ำตาลสูง (${sugar.toFixed(0)}g เกิน 50g ที่แนะนำ)`);
+    else if (sugar > 25 && chronic.includes('เบาหวาน')) warnings.push(`⚠️ น้ำตาล ${sugar.toFixed(0)}g (คุณเป็นเบาหวาน ควรไม่เกิน 25g)`);
+
+    if (sodium > 2300) warnings.push(`⚠️ โซเดียมสูง (${sodium.toFixed(0)}mg เกิน 2,300mg)`);
+    else if (sodium > 1500 && (chronic.includes('ความดัน') || chronic.includes('ไต'))) {
+        warnings.push(`⚠️ โซเดียม ${sodium.toFixed(0)}mg (โรคของคุณควรไม่เกิน 1,500mg)`);
+    }
+
+    const box = document.getElementById('food-ai-suggestion');
+    if (warnings.length > 0) {
+        box.style.display = 'block';
+        box.innerHTML = `<div class="health-warning-box">${warnings.join('<br>')}</div>`;
+    } else if (cal > 0) {
+        box.style.display = 'block';
+        box.innerHTML = `<div class="health-ok-box">✅ สารอาหารวันนี้อยู่ในเกณฑ์ดี!</div>`;
+    } else {
+        box.style.display = 'none';
+    }
+}
+
+function deleteMealItem(meal, idx) {
+    if (!confirm('ลบรายการนี้?')) return;
+    const data = getTodayFood();
+    data[meal].splice(idx, 1);
+    saveTodayFood(data);
+    renderTodayFood();
+}
+
+async function analyzeFoodImage(input) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    const reader = new FileReader();
+
+    reader.onload = async (e) => {
+        const base64 = e.target.result;
+        const base64Data = base64.split(',')[1];
+        const mimeType = file.type;
+
+        // แสดง modal โหลด
+        document.getElementById('meal-picker-modal').style.display = 'flex';
+        document.getElementById('meal-preview').innerHTML = `
+            <img src="${base64}" style="width:100%; max-height:140px; object-fit:cover; border-radius:12px; margin-bottom:10px;">
+            <div style="text-align:center; padding:14px; background:#fff7ed; border-radius:12px; color:var(--primary); font-weight:800;">
+                🤖 น้องใจดีกำลังวิเคราะห์อาหาร...
+            </div>
+        `;
+        // ซ่อนปุ่มเลือกมื้อชั่วคราว
+        document.querySelectorAll('.meal-pick-btn').forEach(b => b.disabled = true);
+
+        const prompt = `วิเคราะห์รูปอาหารนี้และตอบเป็น JSON เท่านั้น ห้ามมีข้อความอื่น:
+{
+  "name": "ชื่ออาหาร (ภาษาไทย)",
+  "portion": "ขนาดประมาณ เช่น 1 จาน",
+  "calories": ตัวเลข,
+  "protein": ตัวเลข (กรัม),
+  "carb": ตัวเลข (กรัม),
+  "fat": ตัวเลข (กรัม),
+  "sugar": ตัวเลข (กรัม),
+  "sodium": ตัวเลข (มิลลิกรัม),
+  "fiber": ตัวเลข (กรัม),
+  "vitamins": "วิตามินเด่น เช่น A, C, B12",
+  "advice": "คำแนะนำสั้นๆ 1 ประโยค"
+}
+ถ้าไม่ใช่อาหาร ให้ตอบ: {"error":"ไม่ใช่รูปอาหาร"}`;
+
+        try {
+            const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    model: "deepseek/deepseek-chat",
+                    messages: [{
+                        role: "user",
+                        content: [
+                            { type: "image_url", image_url: { url: `data:${mimeType};base64,${base64Data}` } },
+                            { type: "text", text: prompt }
+                        ]
+                    }]
+                })
+            });
+            const data = await res.json();
+            let reply = data.choices[0].message.content.trim();
+            // ลบ markdown code block ถ้ามี
+            reply = reply.replace(/```json|```/g, '').trim();
+            // หา JSON ในข้อความ
+            const jsonMatch = reply.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) throw new Error('No JSON');
+            const foodData = JSON.parse(jsonMatch[0]);
+
+            if (foodData.error) {
+                document.getElementById('meal-preview').innerHTML = `
+                    <img src="${base64}" style="width:100%; max-height:140px; object-fit:cover; border-radius:12px; margin-bottom:10px;">
+                    <div style="text-align:center; padding:14px; background:#fee2e2; border-radius:12px; color:#b91c1c; font-weight:700;">
+                        ❌ ${foodData.error}
+                    </div>
+                `;
+                return;
+            }
+
+            pendingFoodData = foodData;
+
+            // แสดงผลวิเคราะห์
+            document.getElementById('meal-preview').innerHTML = `
+                <img src="${base64}" style="width:100%; max-height:140px; object-fit:cover; border-radius:12px; margin-bottom:10px;">
+                <div class="food-analyze-result">
+                    <div style="font-weight:900; font-size:15px; color:var(--primary); margin-bottom:4px;">🍽️ ${foodData.name}</div>
+                    <div style="font-size:11px; color:#888; margin-bottom:10px;">${foodData.portion || ''}</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:12px;">
+                        <div class="nutri-row"><span>🔥 แคลอรี่</span><b>${foodData.calories} kcal</b></div>
+                        <div class="nutri-row"><span>💪 โปรตีน</span><b>${foodData.protein}g</b></div>
+                        <div class="nutri-row"><span>🌾 คาร์บ</span><b>${foodData.carb}g</b></div>
+                        <div class="nutri-row"><span>🥑 ไขมัน</span><b>${foodData.fat}g</b></div>
+                        <div class="nutri-row"><span>🍬 น้ำตาล</span><b>${foodData.sugar}g</b></div>
+                        <div class="nutri-row"><span>🧂 โซเดียม</span><b>${foodData.sodium}mg</b></div>
+                        <div class="nutri-row"><span>🌿 ใยอาหาร</span><b>${foodData.fiber}g</b></div>
+                        <div class="nutri-row"><span>💊 วิตามิน</span><b style="font-size:10px;">${foodData.vitamins || '-'}</b></div>
+                    </div>
+                    ${foodData.advice ? `<div style="margin-top:10px; padding:10px; background:#fef3c7; border-radius:10px; font-size:11px; color:#92400e;">💡 ${foodData.advice}</div>` : ''}
+                </div>
+            `;
+            document.querySelectorAll('.meal-pick-btn').forEach(b => b.disabled = false);
+
+        } catch(err) {
+            console.error(err);
+            document.getElementById('meal-preview').innerHTML = `
+                <div style="text-align:center; padding:20px; background:#fee2e2; border-radius:12px; color:#b91c1c;">
+                    ❌ วิเคราะห์ไม่สำเร็จ ลองอีกครั้งนะคะ
+                </div>
+            `;
+        }
+        input.value = ""; // reset
+    };
+    reader.readAsDataURL(file);
+}
+
+// auto-detect มื้อจากเวลา
+function detectMealByTime() {
+    const h = new Date().getHours();
+    if (h >= 5 && h < 10) return 'breakfast';
+    if (h >= 10 && h < 15) return 'lunch';
+    if (h >= 15 && h < 21) return 'dinner';
+    return 'snack';
+}
+
+function confirmAddMeal(meal) {
+    if (!pendingFoodData) return;
+    const data = getTodayFood();
+    data[meal].push({
+        name: pendingFoodData.name,
+        calories: pendingFoodData.calories,
+        protein: pendingFoodData.protein,
+        carb: pendingFoodData.carb,
+        fat: pendingFoodData.fat,
+        sugar: pendingFoodData.sugar,
+        sodium: pendingFoodData.sodium,
+        fiber: pendingFoodData.fiber,
+        time: new Date().toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})
+    });
+    saveTodayFood(data);
+    pendingFoodData = null;
+    document.getElementById('meal-picker-modal').style.display = 'none';
+    renderTodayFood();
+}
+
+function cancelMealPicker() {
+    pendingFoodData = null;
+    document.getElementById('meal-picker-modal').style.display = 'none';
+    document.getElementById('food-cam-input').value = "";
+}
+
+// ==================== กราฟแคลอรี่ในรายงานสัปดาห์ ====================
+function renderCalorieChart() {
+    const days = getLast7Days();
+    const labels = days.map(d => {
+        const dt = new Date(d);
+        const th = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+        return th[dt.getDay()];
+    });
+    const data = days.map(d => {
+        const raw = localStorage.getItem('food_' + d);
+        if (!raw) return 0;
+        const meals = JSON.parse(raw);
+        let total = 0;
+        ['breakfast','lunch','dinner','snack'].forEach(m => {
+            (meals[m] || []).forEach(it => total += it.calories || 0);
+        });
+        return total;
+    });
+
+    const canvas = document.getElementById('calorie-chart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (calorieChart) calorieChart.destroy();
+
+    const goal = calculateCalorieGoal();
+
+    calorieChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: 'แคลอรี่',
+                data,
+                backgroundColor: data.map(v => v === 0 ? '#e5e7eb' : v > goal ? '#ff4757' : v < goal * 0.7 ? '#fbbf24' : '#10b981'),
+                borderRadius: 8,
+                barThickness: 22
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                annotation: {}
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0.04)' } },
+                x: { ticks: { font: { size: 12, weight: '700' } }, grid: { display: false } }
+            }
+        }
+    });
+
+    // summary
+    const validDays = data.filter(v => v > 0);
+    const avg = validDays.length ? (validDays.reduce((a,b)=>a+b,0)/validDays.length).toFixed(0) : 0;
+    const summary = document.getElementById('calorie-summary');
+    if (validDays.length === 0) {
+        summary.innerHTML = '<p style="text-align:center; color:#ccc; font-size:12px;">ยังไม่มีข้อมูลอาหาร เริ่มถ่ายรูปบันทึกได้เลย 📷</p>';
+    } else {
+        const diff = avg - goal;
+        const status = Math.abs(diff) < 200 ? '🎯 อยู่ในเป้า' : diff > 0 ? '⚠️ เกินเป้าเฉลี่ย' : '⬇️ ต่ำกว่าเป้าเฉลี่ย';
+        summary.innerHTML = `
+            <div style="display:flex; justify-content:space-between; padding:10px; background:#fafafa; border-radius:12px; font-size:12px;">
+                <div>เฉลี่ย: <b style="color:var(--primary);">${avg} kcal</b></div>
+                <div>เป้าหมาย: <b>${goal} kcal</b></div>
+            </div>
+            <div style="text-align:center; font-size:12px; color:#666; margin-top:6px; font-weight:700;">${status}</div>
+        `;
+    }
 }
 
 if ('serviceWorker' in navigator) {
