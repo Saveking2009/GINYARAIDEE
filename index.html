@@ -673,6 +673,36 @@ async function callVisionAPI(messages, options = {}) {
 }
 
 // กรอง reasoning text ที่อาจหลุดมาจาก reasoning models
+// กรองคำต่างประเทศที่แฝงเข้ามา (อังกฤษ จีน ฝรั่งเศส โปรตุเกส ฯลฯ)
+// ใช้กับ output ที่ควรเป็นไทยล้วน เช่น ชื่ออาหาร/คำแนะนำ
+function cleanForeignWords(text) {
+    if (!text) return text;
+    // แปลคำอังกฤษทั่วไปเป็นไทยก่อน (เผื่อ AI ลืม)
+    const translations = {
+        'sodium': 'โซเดียม',
+        'calories': 'แคลอรี่',
+        'calorie': 'แคลอรี่',
+        'protein': 'โปรตีน',
+        'carbs': 'คาร์บ',
+        'fat': 'ไขมัน',
+        'sugar': 'น้ำตาล',
+        'fiber': 'ใยอาหาร'
+    };
+    for (const [en, th] of Object.entries(translations)) {
+        text = text.replace(new RegExp('\\b' + en + '\\b', 'gi'), th);
+    }
+    // ลบวงเล็บที่มีแต่ตัวอักษรต่างประเทศ เช่น "(saveur iving noodles)" "(Wonton mee)"
+    text = text.replace(/\s*\([^()ก-๙]*[a-zA-Z][^()ก-๙]*\)\s*/g, ' ');
+    // ลบคำต่างประเทศที่ไม่ใช่ตัวเลข/หน่วยทั่วไป
+    // เก็บไว้: ตัวเลข, kcal, g, mg, A-Z+B12 (vitamins), %, °
+    text = text.replace(/\b(?!(?:kcal|g|mg|ml|kg|cm|mm|A|B|C|D|E|K|B1|B2|B6|B12|RDA|GI)\b)[a-zA-Z]{3,}\b/g, '');
+    // ลบช่องว่างซ้ำ และ trim
+    text = text.replace(/\s+/g, ' ').trim();
+    // ลบเครื่องหมายวงเล็บว่าง
+    text = text.replace(/\(\s*\)/g, '').trim();
+    return text;
+}
+
 function cleanAIResponse(text) {
     if (!text) return text;
     // ลบ <think>...</think> tags
@@ -1409,6 +1439,11 @@ async function analyzeFoodImage(input) {
 
         const prompt = `คุณคือนักโภชนาการเชี่ยวชาญอาหารไทย-เอเชีย วิเคราะห์รูปนี้แบบละเอียดและแม่นยำ
 
+🚨 **กฎสำคัญที่สุด - ห้ามฝ่าฝืน:**
+- ตอบเป็น**ภาษาไทยเท่านั้น** ห้ามมีคำภาษาอังกฤษ จีน ฝรั่งเศส โปรตุเกส หรือภาษาอื่นใดๆ ปะปน
+- ชื่ออาหารต้องเป็นชื่อไทยที่คนไทยใช้จริง เช่น "บะหมี่หมูแดงเกี๊ยว" ไม่ใช่ "saveur noodles" หรือ "Wonton mee"
+- คำแนะนำต้องเป็นภาษาไทยล้วน ห้ามมีคำต่างประเทศแฝงเช่น "sodium" "calories" "Alemanha"
+
 **🔍 ขั้นตอนวิเคราะห์ (สำคัญมาก - ทำตามลำดับ):**
 
 **ขั้นที่ 1: ระบุประเภทฐานอาหาร (เลือก 1)**
@@ -1497,6 +1532,11 @@ async function analyzeFoodImage(input) {
             const jsonMatch = reply.match(/\{[\s\S]*\}/);
             if (!jsonMatch) throw new Error('AI ตอบไม่เป็น JSON: ' + reply.substring(0, 100));
             const foodData = JSON.parse(jsonMatch[0]);
+
+            // 🧹 กรองคำต่างประเทศที่ AI เผลอใส่มาในชื่อ/คำแนะนำ
+            if (foodData.name) foodData.name = cleanForeignWords(foodData.name);
+            if (foodData.advice) foodData.advice = cleanForeignWords(foodData.advice);
+            if (foodData.portion) foodData.portion = cleanForeignWords(foodData.portion);
 
             if (foodData.error) {
                 document.getElementById('meal-preview').innerHTML = `
