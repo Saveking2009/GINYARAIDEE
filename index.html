@@ -12,7 +12,7 @@
     <meta http-equiv="Expires" content="0">
     <title>Health AI Pro - น้องใจดีดูแลคุณ</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;500;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260516-4">
+    <link rel="stylesheet" href="style.css?v=20260516-6">
     <style>
         .app-logo-img {
             width: 160px;
@@ -766,7 +766,7 @@ async function analyzeSymptomImage(input) {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    model: "qwen/qwen2.5-vl-32b-instruct:free",
+                    model: "google/gemma-4-31b-it:free",
                     messages: [
                         { role: "system", content: buildSystemPrompt() },
                         ...conversationHistory
@@ -850,7 +850,7 @@ async function analyzeDrugImage(input) {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    model: "qwen/qwen2.5-vl-32b-instruct:free",
+                    model: "google/gemma-4-31b-it:free",
                     messages: [
                         { role: "system", content: buildSystemPrompt() },
                         ...conversationHistory
@@ -1410,7 +1410,7 @@ async function analyzeFoodImage(input) {
                 method: "POST",
                 headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    model: "qwen/qwen2.5-vl-32b-instruct:free",
+                    model: "google/gemma-4-31b-it:free",
                     messages: [{
                         role: "user",
                         content: [
