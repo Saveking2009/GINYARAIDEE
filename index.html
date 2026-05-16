@@ -12,7 +12,7 @@
     <meta http-equiv="Expires" content="0">
     <title>Health AI Pro - น้องใจดีดูแลคุณ</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;500;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260516-6">
+    <link rel="stylesheet" href="style.css?v=20260516-7">
     <style>
         .app-logo-img {
             width: 160px;
@@ -628,6 +628,49 @@ function buildSystemPrompt() {
 ตอบเหมือนแชทคุยกับเพื่อนจริงๆ เลย`;
 }
 
+// ลำดับ vision model สำรอง — ถ้าตัวแรกล่ม จะลองตัวถัดไปอัตโนมัติ
+const VISION_MODELS = [
+    "google/gemma-4-31b-it:free",                          // ใหม่สุด ดีสุด แต่อาจติด rate limit
+    "google/gemma-3-27b-it:free",                          // เก่ากว่าแต่ stable
+    "meta-llama/llama-3.2-11b-vision-instruct:free",       // tier 3
+    "mistralai/mistral-small-3.1-24b-instruct:free"        // tier 4
+];
+
+// เรียก vision API พร้อม auto-fallback ถ้าโมเดลแรกล่ม
+async function callVisionAPI(messages, options = {}) {
+    let lastError = null;
+    for (const model of VISION_MODELS) {
+        try {
+            console.log(`🔍 Trying vision model: ${model}`);
+            const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ model, messages, ...options })
+            });
+            const data = await res.json();
+
+            // ถ้ามี error → ลอง model ถัดไป
+            if (data.error) {
+                console.warn(`⚠️ ${model} failed:`, data.error.message);
+                lastError = new Error(data.error.message || JSON.stringify(data.error));
+                continue;
+            }
+            if (!data.choices || !data.choices[0]) {
+                console.warn(`⚠️ ${model} returned no choices`);
+                lastError = new Error('API ตอบกลับผิดรูปแบบ');
+                continue;
+            }
+            console.log(`✅ Success with: ${model}`);
+            return data;
+        } catch (err) {
+            console.warn(`⚠️ ${model} fetch failed:`, err.message);
+            lastError = err;
+        }
+    }
+    // ถ้าทุก model ล่ม → throw error ล่าสุด
+    throw lastError || new Error('ไม่มี vision model ที่ใช้งานได้');
+}
+
 // กรอง reasoning text ที่อาจหลุดมาจาก reasoning models
 function cleanAIResponse(text) {
     if (!text) return text;
@@ -758,24 +801,11 @@ async function analyzeSymptomImage(input) {
         conversationHistory.push(userMsg);
 
         try {
-            // ใช้ model ที่รองรับ vision (deepseek-chat รองรับรูปภาพ)
-            const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${API_KEY}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    model: "google/gemma-4-31b-it:free",
-                    messages: [
-                        { role: "system", content: buildSystemPrompt() },
-                        ...conversationHistory
-                    ]
-                })
-            });
-            const data = await res.json();
-            if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-            if (!data.choices || !data.choices[0]) throw new Error('API ตอบกลับผิดรูปแบบ');
+            // ใช้ vision API พร้อม auto-fallback ถ้าโมเดลแรกล่ม
+            const data = await callVisionAPI([
+                { role: "system", content: buildSystemPrompt() },
+                ...conversationHistory
+            ]);
             const reply = cleanAIResponse(data.choices[0].message.content);
 
             conversationHistory.push({ role: "assistant", content: reply });
@@ -843,23 +873,10 @@ async function analyzeDrugImage(input) {
         conversationHistory.push(userMsg);
 
         try {
-            const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${API_KEY}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    model: "google/gemma-4-31b-it:free",
-                    messages: [
-                        { role: "system", content: buildSystemPrompt() },
-                        ...conversationHistory
-                    ]
-                })
-            });
-            const data = await res.json();
-            if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-            if (!data.choices || !data.choices[0]) throw new Error('API ตอบกลับผิดรูปแบบ');
+            const data = await callVisionAPI([
+                { role: "system", content: buildSystemPrompt() },
+                ...conversationHistory
+            ]);
             const reply = cleanAIResponse(data.choices[0].message.content);
 
             conversationHistory.push({ role: "assistant", content: reply });
@@ -1406,30 +1423,13 @@ async function analyzeFoodImage(input) {
 ถ้าไม่ใช่อาหาร ให้ตอบ: {"error":"ไม่ใช่รูปอาหาร"}`;
 
         try {
-            const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                method: "POST",
-                headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    model: "google/gemma-4-31b-it:free",
-                    messages: [{
-                        role: "user",
-                        content: [
-                            { type: "image_url", image_url: { url: `data:${mimeType};base64,${base64Data}` } },
-                            { type: "text", text: prompt }
-                        ]
-                    }]
-                })
-            });
-            const data = await res.json();
-            // ตรวจ API error
-            if (data.error) {
-                console.error('Food API Error:', data.error);
-                throw new Error(data.error.message || JSON.stringify(data.error));
-            }
-            if (!data.choices || !data.choices[0]) {
-                console.error('Unexpected food response:', data);
-                throw new Error('API ตอบกลับผิดรูปแบบ');
-            }
+            const data = await callVisionAPI([{
+                role: "user",
+                content: [
+                    { type: "image_url", image_url: { url: `data:${mimeType};base64,${base64Data}` } },
+                    { type: "text", text: prompt }
+                ]
+            }]);
             let reply = data.choices[0].message.content.trim();
             console.log('Food AI raw reply:', reply);
             // ลบ markdown code block ถ้ามี
