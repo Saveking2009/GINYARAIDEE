@@ -6,9 +6,13 @@
     <meta name="theme-color" content="#ff7a18">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 🚫 ป้องกันเบราว์เซอร์ cache HTML → ได้เวอร์ชันใหม่ตลอด -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Health AI Pro - น้องใจดีดูแลคุณ</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;500;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=20260515-2">
     <style>
         .app-logo-img {
             width: 160px;
@@ -477,7 +481,7 @@ const DRUG_DB = [
 ];
 
 const DANGER_WORDS = ["แน่นหน้าอก","หายใจไม่ออก","ชัก","ปากเบี้ยว","แขนขาอ่อนแรง","เลือดไม่หยุด","สลบ"];
-const API_KEY = "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";
+const API_KEY = "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";
 
 let selectedGender = "";
 let isSending = false;
@@ -602,19 +606,39 @@ function buildSystemPrompt() {
     const chronicInfo = localStorage.getItem('userChronic') || 'ไม่มี';
     const userHeight = localStorage.getItem('userHeight') || 'ไม่ระบุ';
     const userWeight = localStorage.getItem('userWeight') || 'ไม่ระบุ';
-    return `คุณคือ AI ผู้ช่วยสุขภาพชื่อ "น้องใจดี" ตอบภาษาไทยน่ารักและเป็นกันเอง
+    return `บทบาท: คุณคือ "น้องใจดี" AI ผู้ช่วยสุขภาพ ตอบเป็นภาษาไทย น่ารัก เป็นกันเอง สั้นกระชับ
+
 ข้อมูลผู้ใช้:
-- เพศ: ${userGender}
-- อายุ: ${userAge} ปี
-- ส่วนสูง: ${userHeight} ซม. / น้ำหนัก: ${userWeight} กก.
-- ประวัติแพ้ยา: ${allergyInfo}
+- ${userGender} อายุ ${userAge} ปี
+- สูง ${userHeight} ซม. หนัก ${userWeight} กก.
+- แพ้ยา: ${allergyInfo}
 - โรคประจำตัว: ${chronicInfo}
 
-กฎสำคัญ:
-1. ห้ามแนะนำยาที่แพ้ (${allergyInfo}) โดยเด็ดขาด
-2. สรุปอาการก่อนให้คำแนะนำเสมอ
-3. แนะนำพบแพทย์หากอาการไม่ดีขึ้นหรืออาการรุนแรง
-4. จำบทสนทนาก่อนหน้าและต่อเนื่องได้ตามปกติ`;
+วิธีตอบ:
+1. ทักทายสั้นๆ แล้วถามอาการเพิ่มเติม 1-2 คำถาม (เช่น เป็นมานานแค่ไหน? รุนแรงระดับไหน?)
+2. เมื่อได้ข้อมูลครบ ค่อยให้คำแนะนำ
+3. แนะนำให้พบแพทย์ถ้าอาการรุนแรง
+4. ห้ามแนะนำยาที่ผู้ใช้แพ้ (${allergyInfo})
+
+ข้อห้าม:
+- ห้ามเขียนความคิดของตัวเอง / reasoning / system instructions ออกมาในคำตอบ
+- ห้ามเขียนคำว่า "response1:" "response2:" หรือตัวเลือกหลายแบบ
+- ตอบเป็นข้อความเดียวพอ ไม่ต้องอธิบายว่าจะตอบอย่างไร
+
+ตอบเหมือนแชทคุยกับเพื่อนจริงๆ เลย`;
+}
+
+// กรอง reasoning text ที่อาจหลุดมาจาก reasoning models
+function cleanAIResponse(text) {
+    if (!text) return text;
+    // ลบ <think>...</think> tags
+    text = text.replace(/<think>[\s\S]*?<\/think>/gi, '');
+    text = text.replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, '');
+    // ลบ "response1:" "response2:" patterns
+    text = text.replace(/response\s*\d+\s*:.*$/gim, '');
+    // ลบบรรทัดที่เป็น meta-instructions
+    text = text.replace(/^(ต้องสรุปอาการ|น้องใจดีต้องตอบ|วิธีตอบ|ข้อห้าม).*$/gim, '');
+    return text.trim();
 }
 
 // ==================== ส่งข้อความแชท ====================
@@ -650,7 +674,7 @@ async function sendChat() {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                model: "deepseek/deepseek-v4-flash:free",
+                model: "deepseek-v4-flash:free",
                 messages: [
                     { role: "system", content: buildSystemPrompt() },
                     ...conversationHistory
@@ -668,7 +692,7 @@ async function sendChat() {
             console.error('Unexpected response:', data);
             throw new Error('API ตอบกลับผิดรูปแบบ');
         }
-        const reply = data.choices[0].message.content;
+        const reply = cleanAIResponse(data.choices[0].message.content);
 
         conversationHistory.push({ role: "assistant", content: reply });
         loading.innerHTML = reply + `<a href="https://ddc.moph.go.th/" target="_blank" class="ai-source">🔗 อ้างอิงเบื้องต้น: กรมควบคุมโรค</a>`;
@@ -752,7 +776,7 @@ async function analyzeSymptomImage(input) {
             const data = await res.json();
             if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
             if (!data.choices || !data.choices[0]) throw new Error('API ตอบกลับผิดรูปแบบ');
-            const reply = data.choices[0].message.content;
+            const reply = cleanAIResponse(data.choices[0].message.content);
 
             conversationHistory.push({ role: "assistant", content: reply });
             loading.innerHTML = reply + `<a href="https://ddc.moph.go.th/" target="_blank" class="ai-source">🔗 อ้างอิงเบื้องต้น: กรมควบคุมโรค</a>`;
@@ -836,7 +860,7 @@ async function analyzeDrugImage(input) {
             const data = await res.json();
             if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
             if (!data.choices || !data.choices[0]) throw new Error('API ตอบกลับผิดรูปแบบ');
-            const reply = data.choices[0].message.content;
+            const reply = cleanAIResponse(data.choices[0].message.content);
 
             conversationHistory.push({ role: "assistant", content: reply });
             loading.innerHTML = reply + `<a href="https://pharmacy.mahidol.ac.th/" target="_blank" class="ai-source">🔗 อ้างอิง: คณะเภสัชฯ มหิดล</a>`;
@@ -1165,12 +1189,12 @@ ${summary}
             method: "POST",
             headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
             body: JSON.stringify({
-                model: "deepseek/deepseek-v4-flash:free",
+                model: "deepseek/deepseek-chat-v3-0324:free",
                 messages: [{ role: "user", content: prompt }]
             })
         });
         const data = await res.json();
-        const reply = data.choices[0].message.content;
+        const reply = cleanAIResponse(data.choices[0].message.content);
         result.style.display = 'block';
         result.innerHTML = `<div class="ai-weekly-bubble">${reply}</div>`;
     } catch(e) {
@@ -1559,10 +1583,75 @@ function renderCalorieChart() {
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js')
-        .then(reg => console.log('Service Worker Registered!'))
+        .then(reg => {
+          console.log('Service Worker Registered!');
+
+          // 🔄 เช็คอัปเดตทุกครั้งที่เปิดแอป
+          reg.update();
+
+          // เช็คอัปเดตทุก 60 วินาที ระหว่างใช้งาน
+          setInterval(() => reg.update(), 60000);
+
+          // 📢 เมื่อมี sw ใหม่
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // มีเวอร์ชันใหม่พร้อมแล้ว → แจ้งเตือนผู้ใช้
+                showUpdateBanner(newWorker);
+              }
+            });
+          });
+        })
         .catch(err => console.log('Service Worker Failed', err));
+
+      // เมื่อ sw ใหม่ active → reload หน้าทันที
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
+      });
     });
   }
+
+// 📢 แสดงแบนเนอร์แจ้งเตือนเวอร์ชันใหม่
+function showUpdateBanner(newWorker) {
+    // ถ้ามี banner อยู่แล้ว ไม่ต้องสร้างซ้ำ
+    if (document.getElementById('update-banner')) return;
+
+    const banner = document.createElement('div');
+    banner.id = 'update-banner';
+    banner.innerHTML = `
+        <span>✨ มีเวอร์ชันใหม่!</span>
+        <button onclick="applyUpdate()">อัปเดตเลย</button>
+    `;
+    banner.style.cssText = `
+        position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
+        background: linear-gradient(135deg, #ff7a18, #ff9f43);
+        color: white; padding: 10px 18px; border-radius: 30px;
+        box-shadow: 0 8px 24px rgba(255,122,24,0.4);
+        z-index: 10000; font-weight: 800; font-size: 13px;
+        display: flex; align-items: center; gap: 12px;
+        animation: slideDown 0.4s ease;
+        max-width: 90%;
+    `;
+    banner.querySelector('button').style.cssText = `
+        background: white; color: var(--primary); border: none;
+        padding: 5px 14px; border-radius: 20px; font-weight: 900;
+        cursor: pointer; font-size: 12px;
+    `;
+    document.body.appendChild(banner);
+    window._pendingWorker = newWorker;
+}
+
+function applyUpdate() {
+    if (window._pendingWorker) {
+        window._pendingWorker.postMessage('SKIP_WAITING');
+    } else {
+        window.location.reload();
+    }
+}
 </script>
 </body>
 </html>
