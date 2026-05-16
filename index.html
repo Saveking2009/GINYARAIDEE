@@ -1407,21 +1407,47 @@ async function analyzeFoodImage(input) {
         // ซ่อนปุ่มเลือกมื้อชั่วคราว
         document.querySelectorAll('.meal-pick-btn').forEach(b => b.disabled = true);
 
-        const prompt = `วิเคราะห์รูปอาหารนี้และตอบเป็น JSON เท่านั้น ห้ามมีข้อความอื่น:
+        const prompt = `คุณเป็นนักโภชนาการผู้เชี่ยวชาญอาหารไทย วิเคราะห์รูปอาหารนี้อย่างละเอียดและแม่นยำ
+
+**ขั้นตอนการวิเคราะห์ (คิดในใจ):**
+1. ระบุชื่ออาหาร (เช่น ผัดกะเพราไก่ไข่ดาว, ข้าวมันไก่, ส้มตำไทย)
+2. ประเมินขนาด: ดูจานเทียบกับมือ/ช้อน (จานทั่วไป 23 ซม.)
+3. นับองค์ประกอบ: ข้าว/เส้น กี่ทัพพี? โปรตีน กี่ชิ้น/กี่กรัม? ผัก ไข่ น้ำมัน?
+4. คำนวณจากองค์ประกอบจริง อย่ามั่ว
+
+**ค่าอ้างอิงอาหารไทย (ใช้คำนวณ):**
+- ข้าวสวย 1 ทัพพี (60g) = 80 kcal, คาร์บ 18g
+- เส้นก๋วยเตี๋ยว 1 ถ้วย = 200 kcal, คาร์บ 40g
+- ไก่สับ/หมูสับ 100g = 200 kcal, โปรตีน 20g, ไขมัน 12g
+- ไข่ดาว/ไข่เจียว 1 ฟอง = 90 kcal, โปรตีน 6g, ไขมัน 7g
+- น้ำมันผัด 1 ช้อนโต๊ะ = 120 kcal, ไขมัน 14g
+- น้ำปลา/ซีอิ๊ว 1 ช้อนชา = โซเดียม 350-400mg
+- น้ำตาล 1 ช้อนชา = 16 kcal, น้ำตาล 4g
+- ผัก 1 ทัพพี = 25 kcal, ใยอาหาร 2g
+
+**ตัวอย่างผลลัพธ์ (อาหารทั่วไป):**
+- ผัดกะเพราไก่ไข่ดาว 1 จาน: ~650 kcal, P:32 C:78 F:22 sugar:5 sodium:1500 fiber:3
+- ข้าวมันไก่ 1 จาน: ~550 kcal, P:28 C:65 F:18 sugar:3 sodium:1100 fiber:2
+- ส้มตำไทย 1 จาน: ~150 kcal, P:5 C:25 F:3 sugar:10 sodium:900 fiber:5
+- ก๋วยเตี๋ยวต้มยำหมูสับ: ~450 kcal, P:25 C:55 F:14 sugar:8 sodium:2200 fiber:2
+
+**ตอบเป็น JSON เท่านั้น ห้ามมี text อื่นนอก JSON:**
 {
-  "name": "ชื่ออาหาร (ภาษาไทย)",
-  "portion": "ขนาดประมาณ เช่น 1 จาน",
-  "calories": ตัวเลข,
-  "protein": ตัวเลข (กรัม),
-  "carb": ตัวเลข (กรัม),
-  "fat": ตัวเลข (กรัม),
-  "sugar": ตัวเลข (กรัม),
-  "sodium": ตัวเลข (มิลลิกรัม),
-  "fiber": ตัวเลข (กรัม),
-  "vitamins": "วิตามินเด่น เช่น A, C, B12",
-  "advice": "คำแนะนำสั้นๆ 1 ประโยค"
+  "name": "ชื่ออาหารชัดเจน เช่น ผัดกะเพราไก่ไข่ดาว",
+  "portion": "ระบุปริมาณ เช่น 1 จาน (~350g)",
+  "calories": ตัวเลข (ระหว่าง 50-1500),
+  "protein": ตัวเลขกรัม (0-80),
+  "carb": ตัวเลขกรัม (0-150),
+  "fat": ตัวเลขกรัม (0-80),
+  "sugar": ตัวเลขกรัม (0-50),
+  "sodium": ตัวเลขมิลลิกรัม (0-3000),
+  "fiber": ตัวเลขกรัม (0-15),
+  "vitamins": "วิตามินเด่น 2-3 ตัว เช่น A, C, B12",
+  "advice": "คำแนะนำเชิงสุขภาพ 1 ประโยค สั้น น่ารัก"
 }
-ถ้าไม่ใช่อาหาร ให้ตอบ: {"error":"ไม่ใช่รูปอาหาร"}`;
+
+ถ้าไม่ใช่อาหาร: {"error":"ไม่ใช่รูปอาหาร"}
+ถ้ารูปมัวเกินไป: {"error":"รูปไม่ชัดเจน ลองถ่ายใหม่นะคะ"}`;
 
         try {
             const data = await callVisionAPI([{
@@ -1458,7 +1484,10 @@ async function analyzeFoodImage(input) {
             document.getElementById('meal-preview').innerHTML = `
                 <img src="${base64}" style="width:100%; max-height:140px; object-fit:cover; border-radius:12px; margin-bottom:10px;">
                 <div class="food-analyze-result">
-                    <div style="font-weight:900; font-size:15px; color:var(--primary); margin-bottom:4px;">🍽️ ${foodData.name}</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <div style="font-weight:900; font-size:15px; color:var(--primary); flex:1;">🍽️ ${foodData.name}</div>
+                        <button onclick="openFoodEditor()" style="background:var(--soft-orange); color:var(--primary); border:none; padding:5px 10px; border-radius:14px; font-size:11px; font-weight:800; cursor:pointer; font-family:inherit;">✏️ แก้ไข</button>
+                    </div>
                     <div style="font-size:11px; color:#888; margin-bottom:10px;">${foodData.portion || ''}</div>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:12px;">
                         <div class="nutri-row"><span>🔥 แคลอรี่</span><b>${foodData.calories} kcal</b></div>
@@ -1471,6 +1500,9 @@ async function analyzeFoodImage(input) {
                         <div class="nutri-row"><span>💊 วิตามิน</span><b style="font-size:10px;">${foodData.vitamins || '-'}</b></div>
                     </div>
                     ${foodData.advice ? `<div style="margin-top:10px; padding:10px; background:#fef3c7; border-radius:10px; font-size:11px; color:#92400e;">💡 ${foodData.advice}</div>` : ''}
+                    <div style="margin-top:8px; padding:6px 10px; background:#f0f9ff; border-radius:8px; font-size:10px; color:#0369a1; text-align:center;">
+                        ℹ️ AI ประเมิน อาจคลาดเคลื่อน ±20-30% กดแก้ไขเพื่อปรับค่าได้
+                    </div>
                 </div>
             `;
             document.querySelectorAll('.meal-pick-btn').forEach(b => b.disabled = false);
@@ -1521,6 +1553,122 @@ function cancelMealPicker() {
     pendingFoodData = null;
     document.getElementById('meal-picker-modal').style.display = 'none';
     document.getElementById('food-cam-input').value = "";
+}
+
+// เปิดหน้าจอแก้ไขค่า nutrient
+function openFoodEditor() {
+    if (!pendingFoodData) return;
+    const d = pendingFoodData;
+    document.getElementById('meal-preview').innerHTML = `
+        <div style="background:#fff7ed; border-radius:14px; padding:14px;">
+            <div style="font-weight:900; font-size:14px; color:var(--primary); margin-bottom:12px;">✏️ แก้ไขข้อมูลอาหาร</div>
+            <div class="edit-field">
+                <label>🍽️ ชื่ออาหาร</label>
+                <input type="text" id="edit-name" value="${d.name || ''}">
+            </div>
+            <div class="edit-field">
+                <label>📏 ปริมาณ</label>
+                <input type="text" id="edit-portion" value="${d.portion || ''}">
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <div class="edit-field">
+                    <label>🔥 แคลอรี่ (kcal)</label>
+                    <input type="number" id="edit-calories" value="${d.calories || 0}" min="0">
+                </div>
+                <div class="edit-field">
+                    <label>💪 โปรตีน (g)</label>
+                    <input type="number" id="edit-protein" value="${d.protein || 0}" min="0" step="0.1">
+                </div>
+                <div class="edit-field">
+                    <label>🌾 คาร์บ (g)</label>
+                    <input type="number" id="edit-carb" value="${d.carb || 0}" min="0" step="0.1">
+                </div>
+                <div class="edit-field">
+                    <label>🥑 ไขมัน (g)</label>
+                    <input type="number" id="edit-fat" value="${d.fat || 0}" min="0" step="0.1">
+                </div>
+                <div class="edit-field">
+                    <label>🍬 น้ำตาล (g)</label>
+                    <input type="number" id="edit-sugar" value="${d.sugar || 0}" min="0" step="0.1">
+                </div>
+                <div class="edit-field">
+                    <label>🧂 โซเดียม (mg)</label>
+                    <input type="number" id="edit-sodium" value="${d.sodium || 0}" min="0">
+                </div>
+                <div class="edit-field" style="grid-column:span 2;">
+                    <label>🌿 ใยอาหาร (g)</label>
+                    <input type="number" id="edit-fiber" value="${d.fiber || 0}" min="0" step="0.1">
+                </div>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:14px;">
+                <button onclick="saveFoodEdit()" style="flex:1; background:var(--primary); color:white; border:none; padding:10px; border-radius:12px; font-weight:900; cursor:pointer; font-family:inherit;">💾 บันทึก</button>
+                <button onclick="cancelFoodEdit()" style="flex:1; background:#f1f5f9; color:#666; border:none; padding:10px; border-radius:12px; font-weight:800; cursor:pointer; font-family:inherit;">ยกเลิก</button>
+            </div>
+        </div>
+    `;
+    document.querySelectorAll('.meal-pick-btn').forEach(b => b.disabled = true);
+}
+
+function saveFoodEdit() {
+    pendingFoodData = {
+        ...pendingFoodData,
+        name: document.getElementById('edit-name').value.trim() || pendingFoodData.name,
+        portion: document.getElementById('edit-portion').value.trim() || pendingFoodData.portion,
+        calories: parseFloat(document.getElementById('edit-calories').value) || 0,
+        protein: parseFloat(document.getElementById('edit-protein').value) || 0,
+        carb: parseFloat(document.getElementById('edit-carb').value) || 0,
+        fat: parseFloat(document.getElementById('edit-fat').value) || 0,
+        sugar: parseFloat(document.getElementById('edit-sugar').value) || 0,
+        sodium: parseFloat(document.getElementById('edit-sodium').value) || 0,
+        fiber: parseFloat(document.getElementById('edit-fiber').value) || 0
+    };
+    // กลับไปแสดงผลแบบสรุป (ไม่มีรูป image preview เพราะไม่ได้เก็บ)
+    const d = pendingFoodData;
+    document.getElementById('meal-preview').innerHTML = `
+        <div class="food-analyze-result">
+            <div style="font-weight:900; font-size:15px; color:var(--primary); margin-bottom:4px;">🍽️ ${d.name}</div>
+            <div style="font-size:11px; color:#888; margin-bottom:10px;">${d.portion || ''}</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:12px;">
+                <div class="nutri-row"><span>🔥 แคลอรี่</span><b>${d.calories} kcal</b></div>
+                <div class="nutri-row"><span>💪 โปรตีน</span><b>${d.protein}g</b></div>
+                <div class="nutri-row"><span>🌾 คาร์บ</span><b>${d.carb}g</b></div>
+                <div class="nutri-row"><span>🥑 ไขมัน</span><b>${d.fat}g</b></div>
+                <div class="nutri-row"><span>🍬 น้ำตาล</span><b>${d.sugar}g</b></div>
+                <div class="nutri-row"><span>🧂 โซเดียม</span><b>${d.sodium}mg</b></div>
+                <div class="nutri-row"><span>🌿 ใยอาหาร</span><b>${d.fiber}g</b></div>
+                <div class="nutri-row"><span>💊 วิตามิน</span><b style="font-size:10px;">${d.vitamins || '-'}</b></div>
+            </div>
+            <div style="margin-top:8px; padding:6px 10px; background:#d1fae5; border-radius:8px; font-size:11px; color:#065f46; text-align:center; font-weight:700;">
+                ✅ แก้ไขแล้ว — เลือกมื้อด้านล่างเพื่อบันทึก
+            </div>
+        </div>
+    `;
+    document.querySelectorAll('.meal-pick-btn').forEach(b => b.disabled = false);
+}
+
+function cancelFoodEdit() {
+    // กลับไปแสดงค่าเดิมจาก AI
+    const d = pendingFoodData;
+    document.getElementById('meal-preview').innerHTML = `
+        <div class="food-analyze-result">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <div style="font-weight:900; font-size:15px; color:var(--primary); flex:1;">🍽️ ${d.name}</div>
+                <button onclick="openFoodEditor()" style="background:var(--soft-orange); color:var(--primary); border:none; padding:5px 10px; border-radius:14px; font-size:11px; font-weight:800; cursor:pointer; font-family:inherit;">✏️ แก้ไข</button>
+            </div>
+            <div style="font-size:11px; color:#888; margin-bottom:10px;">${d.portion || ''}</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:12px;">
+                <div class="nutri-row"><span>🔥 แคลอรี่</span><b>${d.calories} kcal</b></div>
+                <div class="nutri-row"><span>💪 โปรตีน</span><b>${d.protein}g</b></div>
+                <div class="nutri-row"><span>🌾 คาร์บ</span><b>${d.carb}g</b></div>
+                <div class="nutri-row"><span>🥑 ไขมัน</span><b>${d.fat}g</b></div>
+                <div class="nutri-row"><span>🍬 น้ำตาล</span><b>${d.sugar}g</b></div>
+                <div class="nutri-row"><span>🧂 โซเดียม</span><b>${d.sodium}mg</b></div>
+                <div class="nutri-row"><span>🌿 ใยอาหาร</span><b>${d.fiber}g</b></div>
+                <div class="nutri-row"><span>💊 วิตามิน</span><b style="font-size:10px;">${d.vitamins || '-'}</b></div>
+            </div>
+        </div>
+    `;
+    document.querySelectorAll('.meal-pick-btn').forEach(b => b.disabled = false);
 }
 
 // ==================== กราฟแคลอรี่ในรายงานสัปดาห์ ====================

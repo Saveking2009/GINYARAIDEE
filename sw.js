@@ -1,5 +1,5 @@
 // เปลี่ยนเลขนี้ทุกครั้งที่ deploy ใหม่ (หรือใช้ timestamp อัตโนมัติด้านล่าง)
-const CACHE_VERSION = 'v20260516-7';
+const CACHE_VERSION = 'v20260516-8';
 const CACHE_NAME = 'nong-jaidee-' + CACHE_VERSION;
 
 const ASSETS = [

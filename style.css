@@ -904,3 +904,36 @@ body.dark .health-ok-box { background: #064e3b; border-color: #10b981; color: #6
     transform: scale(1.05);
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
+
+/* ==================== Edit Food Form ==================== */
+.edit-field {
+    margin-bottom: 10px;
+}
+.edit-field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    color: #555;
+    margin-bottom: 4px;
+}
+.edit-field input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1.5px solid #eee;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+.edit-field input:focus {
+    border-color: var(--primary);
+}
+body.dark .edit-field label { color: #94a3b8; }
+body.dark .edit-field input {
+    background: #112233;
+    border-color: #2a4a6a;
+    color: #cfe8ff;
+}
+body.dark .edit-field input:focus { border-color: #7ab8e8; }
