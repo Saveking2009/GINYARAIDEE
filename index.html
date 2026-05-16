@@ -766,7 +766,7 @@ async function analyzeSymptomImage(input) {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    model: "qwen2.5-vl-32b-instruct:free",
+                    model: "qwen/qwen2.5-vl-32b-instruct:free",
                     messages: [
                         { role: "system", content: buildSystemPrompt() },
                         ...conversationHistory
@@ -850,7 +850,7 @@ async function analyzeDrugImage(input) {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    model: "qwen2.5-vl-32b-instruct:free",
+                    model: "qwen/qwen2.5-vl-32b-instruct:free",
                     messages: [
                         { role: "system", content: buildSystemPrompt() },
                         ...conversationHistory
@@ -1410,7 +1410,7 @@ async function analyzeFoodImage(input) {
                 method: "POST",
                 headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    model: "qwen2.5-vl-32b-instruct:free",
+                    model: "qwen/qwen2.5-vl-32b-instruct:free",
                     messages: [{
                         role: "user",
                         content: [
