@@ -12,7 +12,7 @@
     <meta http-equiv="Expires" content="0">
     <title>Health AI Pro - น้องใจดีดูแลคุณ</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;500;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260516-3">
+    <link rel="stylesheet" href="style.css?v=20260516-4">
     <style>
         .app-logo-img {
             width: 160px;
@@ -674,7 +674,7 @@ async function sendChat() {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                model: "qwen/qwen3-next-80b-a3b-instruct:free",
+                model: "deepseek/deepseek-v4-flash:free",
                 messages: [
                     { role: "system", content: buildSystemPrompt() },
                     ...conversationHistory
@@ -1189,7 +1189,7 @@ ${summary}
             method: "POST",
             headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
             body: JSON.stringify({
-                model: "qwen/qwen3-next-80b-a3b-instruct:free",
+                model: "deepseek/deepseek-v4-flash:free",
                 messages: [{ role: "user", content: prompt }]
             })
         });
